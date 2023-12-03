@@ -1,5 +1,3 @@
-import { ServeStatic } from '@nestjs/platform-express';
-
 import './assets/main.css'
 
 import { createApp } from 'vue'
