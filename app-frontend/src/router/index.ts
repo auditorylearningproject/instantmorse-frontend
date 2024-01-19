@@ -8,8 +8,8 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      meta: { layout: 'AppLayout'},
-      component: HomeView
+      meta: { layout: 'AppLayout', pageTitle: "Home"},
+      components:{ default: HomeView },
     },
     {
       path: '/about',
@@ -30,7 +30,8 @@ const router = createRouter({
       path: '/:catchAll(.*)',
       name: 'notFound',
       component: () => import ('../views/404.vue'),
-      }
+      meta: { pageTitle: "404 Not Found" }
+    }
   ]
 })
 
