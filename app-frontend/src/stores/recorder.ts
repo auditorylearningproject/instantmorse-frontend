@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia';
 import { ref, type Ref } from 'vue'
 
-interface Clip {
+
+export interface Clip {
   name: string;
   audio: Blob;
 }
@@ -15,6 +16,10 @@ export const useAudioStore = defineStore('recordings', () => {
     function addRecording(recording: Clip) {
         recordings.value.push({name:"", audio:recording.audio});
     }
+
+    function getRecording(id: number): Clip | undefined {
+      return recordings.value[id]
+    }
   
-    return { recordings, clearRecordings, addRecording }
+    return { recordings, clearRecordings, addRecording, getRecording }
   });

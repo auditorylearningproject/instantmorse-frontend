@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE-edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Authentication and Registration Page</title>
+        <style>
+            * {
+                box-sizing: border-box;
+            }
+            .column {
+                float: left;
+                padding: 5px;
+                height: 200px;
+            }
+            .left {
+                width: 30%;
+                
+            }
+            .middle {
+                width: 10%;
+            }
+            .right {
+                width: 30%;
+            }
+            .center {
+                margin: auto;
+                width: 10%;
+            }
+            /* Clear floats after the columns */
+            .row:after {
+                content: "";
+                display: table;
+                clear: both;
+            }
+        </style>
+    </head>
+    <body>
+        <p title>Authentication Page</p>
+        <div class="row">
+            <div class="column left" style="background-color:#fd5656;">
+                <form id="returning_users" name="returning_users">
+                    <p title>For Returning Users</p>
+                    <label for="user">Username:</label><br>
+                    <input id="user" name="user" type="text"><br>
+                    <label for="pass">Password</label><br>
+                    <input id="pass" name="pass" type="text"><br><br>
+                    <button onclick="retUserSubmit()">Submit</button>
+                    <script src="../Backend/main.js"></script>
+                </form>
+            </div>
+            <div class="column middle" style="background-color: rgb(255, 255, 255);"></div>
+            <div class="column right" style="background-color:#7682f2;">
+                <form id="new_users" name="new_users">
+                    <p title>For New Users</p>
+                    <label for="user">Username:</label><br>
+                    <input id="user" name="user" type="text"><br>
+                    <label for="pass">Password</label><br>
+                    <input id="pass" name="pass" type="text"><br><br>
+                    <button onclick="newUserSubmit()">Submit</button>
+                    <script src="../Backend/main.js"></script>
+                </form>
+            </div>
+        </div>
+
+        <br><br>
+
+    </body>
+</html>
