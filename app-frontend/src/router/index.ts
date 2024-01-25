@@ -23,14 +23,14 @@ const router = createRouter({
     {
       path: '/record',
       name: 'record',
-      meta: { layout: 'BlankLayout'},
+      meta: { layout: 'BlankLayout', pageTitle: "Recorder Widget"},
       component: RecordView
     },
     {
       path: '/:catchAll(.*)',
       name: 'notFound',
       component: () => import ('../views/404.vue'),
-      meta: { pageTitle: "404 Not Found" }
+      meta: { layout: 'BlankLayout', pageTitle: "404 Not Found" }
     }
   ]
 })

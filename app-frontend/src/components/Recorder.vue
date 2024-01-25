@@ -20,6 +20,7 @@
         <audio controls :src="getAudioURL(clip.audio)"></audio>
         <p>{{ clip.name }}</p>
         <button @click="deleteRecording(index)">Delete</button>
+        <button @click="transcriber.transcribe(index)">Transcribe</button>
       </article>
     </section>
     
@@ -32,7 +33,9 @@
 <script lang="ts" setup>
 import { ref, computed, watch, onMounted, type Ref } from 'vue'
 import { useAudioStore } from '@/stores/recorder';
+import { Transcriber } from './speech_to_text'
 
+const transcriber = new Transcriber();
 
 interface Clip {
   name: string;
@@ -51,7 +54,8 @@ function stopRecording(){
   console.log(mediaRecorder.state);
 }
 function captureMediaStream(stream: MediaStream){
-  mediaRecorder = new MediaRecorder(stream);
+  mediaRecorder = new MediaRecorder(stream, {audioBitsPerSecond: 8000 });
+
   mediaRecorder.ondataavailable = (e) => {
   data.push(e.data);
   };
@@ -78,7 +82,7 @@ onMounted(() => {
       alert("Recording not saved.");
     }
     else {
-      store.addRecording({name: clipName, audio: new Blob(data, { type: "audio/ogg; codecs=opus" })})
+      store.addRecording({name: clipName, audio: new Blob(data, { type: "audio/ogg; codecs=opus" })}) //or webm
       // const clipContainer = document.createElement("article");
       // const clipLabel = document.createElement("p");
       // const audio = document.createElement("audio");
