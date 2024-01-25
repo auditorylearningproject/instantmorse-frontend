@@ -12,7 +12,7 @@ import HelloWorld from '../components/HelloWorld.vue'
 
       <nav>
         <RouterLink to="/">Home</RouterLink>
-        <a href="/static/auth_page.html">Authentication Demo</a>
+        <a href="/static/AuthenticationPage.html">Authentication Demo</a>
         <RouterLink to="/select-course-session">Course Session Select Demo</RouterLink>
         <RouterLink to="/record">Record Speech Demo</RouterLink>
         <RouterLink to="/cw-widget">CW Player Widget Demo</RouterLink>
