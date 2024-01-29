@@ -5,11 +5,12 @@ import { ref, type Ref } from 'vue'
 export interface Clip {
   name: string;
   audio: Blob;
+  transcription?: string;
 }
 
 export const useAudioStore = defineStore('recordings', () => {
     const recordings: Ref<Clip[]> = ref([])
-
+    
     function clearRecordings() {
       recordings.value.length = 0;
     }

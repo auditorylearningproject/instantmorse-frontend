@@ -16,11 +16,23 @@
 
     <section v-show="showSoundClips" class="sound-clips" ref="pElementRef">
       <span v-if="allClips.length === 0">You have no sound clips recorded.</span>
-        <article v-for="(clip, index) in allClips" :key="index" class="clip">
+      <article v-for="(clip, index) in allClips" :key="index" class="clip">
         <audio controls :src="getAudioURL(clip.audio)"></audio>
         <p>{{ clip.name }}</p>
+        <span v-if="clip.transcription">{{ clip.transcription }}</span>
         <button @click="deleteRecording(index)">Delete</button>
-        <button @click="transcriber.transcribe(index)">Transcribe</button>
+        <button @click="(event) => {
+            transcriber.transcribe(index)
+      .then(result => {
+          // Handle the result here
+          console.log('Async result:', result);
+          clip.transcription = result;
+      })
+      .catch(error => {
+          // Handle errors
+          console.error('Async error:', error);
+      });
+        }">Transcribe</button>
       </article>
     </section>
     
@@ -31,7 +43,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, watch, onMounted, type Ref } from 'vue'
+import { ref, computed, watch, reactive, onMounted, type Ref } from 'vue'
 import { useAudioStore } from '@/stores/recorder';
 import { Transcriber } from './speech_to_text'
 
@@ -54,7 +66,7 @@ function stopRecording(){
   console.log(mediaRecorder.state);
 }
 function captureMediaStream(stream: MediaStream){
-  mediaRecorder = new MediaRecorder(stream, {audioBitsPerSecond: 8000 });
+  mediaRecorder = new MediaRecorder(stream, {audioBitsPerSecond: 48000 });
 
   mediaRecorder.ondataavailable = (e) => {
   data.push(e.data);
@@ -82,8 +94,14 @@ onMounted(() => {
       alert("Recording not saved.");
     }
     else {
-      store.addRecording({name: clipName, audio: new Blob(data, { type: "audio/ogg; codecs=opus" })}) //or webm
-      // const clipContainer = document.createElement("article");
+      const isChrome = navigator.userAgent.indexOf("Chrome") !== -1;
+
+const audioFormat = isChrome ? "webm" : "ogg";
+
+store.addRecording({
+    name: clipName,
+    audio: new Blob(data, { type: `audio/${audioFormat}; codecs=opus` })
+});      // const clipContainer = document.createElement("article");
       // const clipLabel = document.createElement("p");
       // const audio = document.createElement("audio");
       // const deleteButton = document.createElement("button");
@@ -117,7 +135,7 @@ let mediaRecorder: MediaRecorder;
 
 let data: Blob[] = []
 const store = useAudioStore();
-const allClips = computed(() => store.recordings)
+const allClips = reactive(store.recordings);
 
 
 if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
