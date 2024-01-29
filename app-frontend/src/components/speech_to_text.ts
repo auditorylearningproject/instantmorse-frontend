@@ -26,7 +26,7 @@ export class Transcriber{
         }
     }
 
-  private async sendRecordingRequest(recording: Blob): string {
+  private async sendRecordingRequest(recording: Blob): Promise<string> {
       try {
           // Extract content type from recording.value (e.g., "audio/ogg; codecs=opus")
         //  const contentType = recording.type.split('/')[1].split().trim();
