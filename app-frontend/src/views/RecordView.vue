@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import Recorder from '../components/Recorder.vue'
+import Recorder from '../components/RecorderItem.vue'
 </script>
 
 <template>
