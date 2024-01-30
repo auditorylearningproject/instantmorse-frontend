@@ -96,12 +96,12 @@ onMounted(() => {
     else {
       const isChrome = navigator.userAgent.indexOf("Chrome") !== -1;
 
-const audioFormat = isChrome ? "webm" : "ogg";
+      const audioFormat = isChrome ? "webm" : "ogg";
 
-store.addRecording({
-    name: clipName,
-    audio: new Blob(data, { type: `audio/${audioFormat}; codecs=opus` })
-});      // const clipContainer = document.createElement("article");
+      store.addRecording({
+      name: clipName,
+      audio: new Blob(data, { type: `audio/${audioFormat}; codecs=opus` })
+      });      // const clipContainer = document.createElement("article");
       // const clipLabel = document.createElement("p");
       // const audio = document.createElement("audio");
       // const deleteButton = document.createElement("button");
@@ -122,10 +122,10 @@ store.addRecording({
       // audio.src = audioURL;
 
 
-    }
+    } 
     data.length = 0;
 
-  };};
+    };};
 
   })
 
