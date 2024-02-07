@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import RecordView from '@/views/RecordView.vue'
 import AudioPlayerVue from '@/views/AudioPlayer.vue'
+import 
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -32,6 +33,11 @@ const router = createRouter({
       name: 'playcw',
       meta: { layout: 'BlankLayout'},
       component: AudioPlayerVue
+    },
+    {
+      path: '/static/AuthenticationPage.html',
+      name: 'authentication',
+      meta: {layout: 'BlankLayout'}
     },
     {
       path: '/:catchAll(.*)',

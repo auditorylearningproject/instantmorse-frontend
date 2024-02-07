@@ -27,7 +27,7 @@ import SupportIcon from './icons/IconSupport.vue'
     <template #icon>
       <EcosystemIcon />
     </template>
-    David
+    Davi
   </WelcomeItem>
 
   <WelcomeItem>
