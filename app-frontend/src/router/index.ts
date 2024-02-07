@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import RecordView from '@/views/RecordView.vue'
 import AudioPlayerVue from '@/views/AudioPlayer.vue'
-import 
+import AuthenticationView from '@/views/AuthenticationView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -37,7 +37,8 @@ const router = createRouter({
     {
       path: '/static/AuthenticationPage.html',
       name: 'authentication',
-      meta: {layout: 'BlankLayout'}
+      meta: {layout: 'BlankLayout', pageTitle: "Authentication Page"},
+      component: AuthenticationView
     },
     {
       path: '/:catchAll(.*)',
