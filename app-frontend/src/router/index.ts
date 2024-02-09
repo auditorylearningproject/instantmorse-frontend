@@ -36,14 +36,14 @@ const router = createRouter({
       component: AudioPlayerVue
     },
     {
-      path: '/Authentication',
-      name: 'authentication',
+      path: '/authentication',
+      name: 'Authentication',
       meta: {layout: 'BlankLayout', pageTitle: "Authentication Page"},
       component: AuthenticationView
     },
     {
-      path: '/static/NewUsers.html',
-      name: 'registration',
+      path: '/registration',
+      name: 'Registration',
       meta: { layout: 'BlankLayout', pageTitle: "Registration Page" },
       component: RegistrationView
     },

@@ -12,8 +12,8 @@ import HelloWorld from '../components/HelloWorld.vue'
 
       <nav>
         <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/static/AuthenticationPage.html">Authentication Demo - Old Users</RouterLink>
-        <RouterLink to="/static/NewUsers.html">Authentication Demo - New Users</RouterLink>
+        <RouterLink to="/authentication">Authentication Page - Old Users</RouterLink>
+        <RouterLink to="/registration">Registration Page - New Users</RouterLink>
         <RouterLink to="/select-course-session">Course Session Select Demo</RouterLink>
         <RouterLink to="/record">Record Speech Demo</RouterLink>
         <RouterLink to="/cw-widget">CW Player Widget Demo</RouterLink>
