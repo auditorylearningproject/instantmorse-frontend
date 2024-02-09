@@ -1,7 +1,7 @@
 <template>
-    <div class="authentication">
+    <div class="registration">
         <header>
-            <h1>Authentication Page</h1>
+            <h1>Registration Page</h1>
         </header>
 
         <section class='user_pass'>
@@ -23,18 +23,20 @@
 </template>
 
 <script lang="ts" setup>
-    function submit() {
+function submit() {
 
-    }
+}
 </script>
 
 <style scoped>
 header {
     height: 70px;
 }
+
 .user-pass {
     box-sizing: border-box;
 }
+
 .submitButton {
     color: #000000;
 }

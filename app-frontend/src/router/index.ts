@@ -3,6 +3,7 @@ import HomeView from '../views/HomeView.vue'
 import RecordView from '@/views/RecordView.vue'
 import AudioPlayerVue from '@/views/AudioPlayer.vue'
 import AuthenticationView from '@/views/AuthenticationView.vue'
+import RegistrationView from '@/views/RegistrationView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -35,10 +36,16 @@ const router = createRouter({
       component: AudioPlayerVue
     },
     {
-      path: '/static/AuthenticationPage.html',
+      path: '/Authentication',
       name: 'authentication',
       meta: {layout: 'BlankLayout', pageTitle: "Authentication Page"},
       component: AuthenticationView
+    },
+    {
+      path: '/static/NewUsers.html',
+      name: 'registration',
+      meta: { layout: 'BlankLayout', pageTitle: "Registration Page" },
+      component: RegistrationView
     },
     {
       path: '/:catchAll(.*)',
