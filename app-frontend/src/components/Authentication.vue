@@ -3,29 +3,41 @@
         <header>
             <h1>Authentication Page</h1>
         </header>
-
-        <section class='user_pass'>
-            <div id="username">
+            <form @submit.prevent="submit">
                 <label for="user">Username:</label><br>
-                <input id="user" name="user" type="text"><br>
-            </div>
-            <div id="password">
-                <label for="pass">Password</label><br>
-                <input id="pass" name="pass" type="text"><br><br>
-            </div>
-        </section>
-        <section class="submitButton">
-            <div id="buttons">
-                <button class="submit" @click="submit">Submit</button>
-            </div>
-        </section>
+                <input v-model="username" type="text" placeholder="Username" required><br>
+                <label for="pass">Password:</label><br>
+                <input v-model="password" type="text" placeholder="Password" required><br><br>
+                <button class="submit">Submit</button>
+            </form>
     </div>
 </template>
 
-<script lang="ts" setup>
-    function submit() {
-
-    }
+<script lang="ts">
+    export default {
+        data() {
+            return {
+                username: '',
+                password: ''
+            };
+        },
+        methods: {
+            async submit() {
+                const url = "location.origin";
+                const response = await fetch(url+"api/users", {
+                    method: "POST",
+                    headers: {
+                    "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ 
+                        username: this.username,
+                        password: this.password,
+                    }),
+                });
+                console.log("Username: " + {username: this.username} + " Password: " + {password: this.password});
+            },
+        },
+    };
 </script>
 
 <style scoped>
