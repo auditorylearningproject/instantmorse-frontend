@@ -8,7 +8,7 @@
                 <input v-model="username"  id="user" type="text" placeholder="Username" required><br>
                 <label for="pass">Password:</label><br>
                 <input v-model="password" id="pass" type="text" placeholder="Password" required><br><br>
-                <button @click="submitForm" class="submit">Submit</button>
+                <button class="submit">Submit</button>
             </form>
         </div>
     </template>
@@ -27,7 +27,7 @@
                 console.log("Submit was clicked. Now awaiting a response")
                 const url = "location.origin";
                 try {
-                    const response = await axios.post(url+"api/authentication/login", {
+                    const response = await axios.post(url+"api/users/login", {
                         username: this.username,
                         password: this.password
                     });
