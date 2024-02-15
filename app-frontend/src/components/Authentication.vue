@@ -27,14 +27,22 @@
                 console.log("Submit was clicked. Now awaiting a response")
                 const url = location.origin;
                 try {
-                    const response = await axios.post(url+"api/authentication/login", {
+                    const response = await axios.post(url+"/api/authentication/login", {
                         username: this.username,
                         password: this.password
                     });
-                    console.log(response.data); // Handle response from Nest.js if needed
-                    if (response.statusText == "404") {
+                    console.log(response.status); // Handle response from Nest.js if needed
+                    // console.log(response.request);
+                    // console.log(response.config.validateStatus?.toString);
+                    // let token = response.data.data.token;
+                    // localStorage.setItem("user", token);
+                    
+
+                    if (response.statusText == "200") {
                         this.redirect();
-                    }
+                    }    
+                    // if (response.statusText == "404") {
+                    // }
                 } catch(error) {
                     console.error('Error signing in:', error);
                 }
