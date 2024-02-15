@@ -32,7 +32,7 @@
                         password: this.password
                     });
                     console.log(response.data); // Handle response from Nest.js if needed
-                    if (response.statusText == "Success") {
+                    if (response.statusText == "404") {
                         this.redirect();
                     }
                 } catch(error) {
