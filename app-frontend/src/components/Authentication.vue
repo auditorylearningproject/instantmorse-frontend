@@ -25,7 +25,7 @@
         methods: {
             async submitForm() {
                 console.log("Submit was clicked. Now awaiting a response")
-                const url = "location.origin";
+                const url = location.origin;
                 try {
                     const response = await axios.post(url+"api/authentication/login", {
                         username: this.username,
