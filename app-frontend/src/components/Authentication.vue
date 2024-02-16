@@ -11,7 +11,7 @@
                 <button class="submit">Submit</button> <br><br>
             </form>
     </div>
-    <div class="registration">
+    <div class="toRegistration">
         <form @submit.prevent="linkToRegister">
             <button class="register">Not Registered? Click Here!</button>
         </form>
@@ -32,20 +32,26 @@
                 console.log("Submit was clicked. Now awaiting a response");
                 const url = location.origin;
                 try {
-                    const response = await axios.post(url+"/api/authentication/login", {
+                    axios.post(url+"/api/authentication/login", {
                         username: this.username,
                         password: this.password
+                    },
+                    {
+                       timeout: 2000 
+                    })
+                    .then((response) => {
+                        if (response.data !== null) {
+                            this.$router.push('/');
+                        } else {
+                            location.reload();
+                        }
                     });
-                    console.log(response.data)
-                    if (response.data !== null) {
-                        this.$router.push('/');
-                    }
-                } catch(error) {
-                    console.error('Error signing in:', error);
+                } catch(timeout) {
+                    console.log("Timed out");
                 }
             },
             async linkToRegister() {
-                console.log("Registration was clicked. Now awaiting a response");
+                console.log("Registration was clicked. Rerouting to the Registration Page");
                 try {
                     this.$router.push('/registration');
                 } catch(error) {
@@ -59,11 +65,12 @@
 <style scoped>
 header {
     height: 70px;
+    padding-left: 40%;
 }
-.user-pass {
-    box-sizing: border-box;
+.authentication {
+    padding-left: 40%;
 }
-.submitButton {
-    color: #000000;
+.toRegistration {
+    padding-left: 40%;
 }
 </style>
