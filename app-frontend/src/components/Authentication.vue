@@ -33,7 +33,7 @@
                     });
                     console.log(response.status); // Handle response from Nest.js if needed
                     // console.log(response.request);
-                    console.log(response.config.validateStatus?);
+                    console.log(response.config.validateStatus?.toString);
                     // let token = response.data.data.token;
                     // localStorage.setItem("user", token);
                     
@@ -41,12 +41,13 @@
                     if (response.status === 200) {
                         this.$router.push('/');
                     } else if (response.status !== 200) {
+                        
                         console.log("I am in the else");
                         this.$router.push('/authentication');
                     }
                 } catch(error) {
                     console.error('Error signing in:', error);
-                } catch()
+                }
                 // const response = await fetch(url+"api/users", {
                 //     method: "POST",
                 //     headers: {
