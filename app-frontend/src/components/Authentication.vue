@@ -36,13 +36,8 @@
                         username: this.username,
                         password: this.password
                     });
-                    console.log(response.status); // Handle response from Nest.js if needed
-                    // console.log(response.request);
-                    console.log(response.config.validateStatus?.toString);
-                    let token = response.data.data.token;
-                    localStorage.setItem("user", token);
-                    console.log = (response.data.data.token);
-                    if (response.status === 200) {
+                    console.log(response.data.renderToString)
+                    if (response.data !== null) {
                         this.$router.push('/');
                     }
                 } catch(error) {
