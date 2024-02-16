@@ -13,7 +13,7 @@
     </div>
     <div class="registration">
         <form @submit.prevent="linkToRegister">
-            <button class="register">Not Registered?</button>
+            <button class="register">Not Registered? Click Here!</button>
         </form>
     </div>
     </template>
@@ -42,14 +42,8 @@
                     let token = response.data.data.token;
                     localStorage.setItem("user", token);
                     console.log = (response.data.data.token);
-                    
-
                     if (response.status === 200) {
                         this.$router.push('/');
-                    } else if (response.status !== 200) {
-                        
-                        console.log("I am in the else");
-                        this.$router.push('/authentication');
                     }
                 } catch(error) {
                     console.error('Error signing in:', error);
