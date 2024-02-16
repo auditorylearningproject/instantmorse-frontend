@@ -36,7 +36,7 @@
                         username: this.username,
                         password: this.password
                     });
-                    console.log(response.data.renderToString)
+                    console.log(response.data)
                     if (response.data !== null) {
                         this.$router.push('/');
                     }
