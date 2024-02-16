@@ -13,13 +13,13 @@
     </div>
     <div class="registration">
         <form @submit.prevent="linkToRegister">
-            <button class="register">Not Registered?</button>
+            <button class="register">Not Registered? Click Here!</button>
         </form>
     </div>
     </template>
 
 <script lang="ts">
-    import axios, { Axios } from 'axios';
+    import axios from 'axios';
     export default {
         data() {
             return {
@@ -42,14 +42,8 @@
                     let token = response.data.data.token;
                     localStorage.setItem("user", token);
                     console.log = (response.data.data.token);
-                    
-
                     if (response.status === 200) {
                         this.$router.push('/');
-                    } else if (response.status !== 200) {
-                        
-                        console.log("I am in the else");
-                        this.$router.push('/authentication');
                     }
                 } catch(error) {
                     console.error('Error signing in:', error);
@@ -61,7 +55,7 @@
                     this.$router.push('/registration');
                 } catch(error) {
                     console.error("Error switching to registration page", error);
-                },
+                }
             },
         },
     };
