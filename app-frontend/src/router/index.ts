@@ -2,6 +2,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import RecordView from '@/views/RecordView.vue'
 import AudioPlayerVue from '@/views/AudioPlayer.vue'
+import AuthenticationView from '@/views/AuthenticationView.vue'
+import RegistrationView from '@/views/RegistrationView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -32,6 +34,18 @@ const router = createRouter({
       name: 'playcw',
       meta: { layout: 'BlankLayout'},
       component: AudioPlayerVue
+    },
+    {
+      path: '/authentication',
+      name: 'Authentication',
+      meta: {layout: 'BlankLayout', pageTitle: "Authentication Page"},
+      component: AuthenticationView
+    },
+    {
+      path: '/registration',
+      name: 'Registration',
+      meta: { layout: 'BlankLayout', pageTitle: "Registration Page" },
+      component: RegistrationView
     },
     {
       path: '/:catchAll(.*)',
