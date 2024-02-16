@@ -8,9 +8,14 @@
                 <input v-model="username"  id="user" type="text" placeholder="Username" required><br>
                 <label for="pass">Password:</label><br>
                 <input v-model="password" id="pass" type="text" placeholder="Password" required><br><br>
-                <button class="submit">Submit</button>
+                <button class="submit">Submit</button> <br><br>
             </form>
-        </div>
+    </div>
+    <div class="registration">
+        <form @submit.prevent="linkToRegister">
+            <button class="register">Not Registered?</button>
+        </form>
+    </div>
     </template>
 
 <script lang="ts">
@@ -24,7 +29,7 @@
         },
         methods: {
             async submitForm() {
-                console.log("Submit was clicked. Now awaiting a response")
+                console.log("Submit was clicked. Now awaiting a response");
                 const url = location.origin;
                 try {
                     const response = await axios.post(url+"/api/authentication/login", {
@@ -34,8 +39,9 @@
                     console.log(response.status); // Handle response from Nest.js if needed
                     // console.log(response.request);
                     console.log(response.config.validateStatus?.toString);
-                    // let token = response.data.data.token;
-                    // localStorage.setItem("user", token);
+                    let token = response.data.data.token;
+                    localStorage.setItem("user", token);
+                    console.log = (response.data.data.token);
                     
 
                     if (response.status === 200) {
@@ -48,21 +54,15 @@
                 } catch(error) {
                     console.error('Error signing in:', error);
                 }
-                // const response = await fetch(url+"api/users", {
-                //     method: "POST",
-                //     headers: {
-                //     "Content-Type": "application/json",
-                //     },
-                //     body: JSON.stringify({ 
-                //         username: this.username,
-                //         password: this.password,
-                //     }),
-                // });
-
             },
-            // redirect() {
-            //    this.$router.push('/');
-            // },
+            async linkToRegister() {
+                console.log("Registration was clicked. Now awaiting a response");
+                try {
+                    this.$router.push('/registration');
+                } catch(error) {
+                    console.error("Error switching to registration page", error);
+                },
+            },
         },
     };
 </script>
