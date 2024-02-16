@@ -19,7 +19,7 @@
     </template>
 
 <script lang="ts">
-    import axios, { Axios } from 'axios';
+    import axios from 'axios';
     export default {
         data() {
             return {
@@ -55,7 +55,7 @@
                     this.$router.push('/registration');
                 } catch(error) {
                     console.error("Error switching to registration page", error);
-                },
+                }
             },
         },
     };
