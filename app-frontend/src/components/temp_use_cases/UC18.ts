@@ -12,7 +12,7 @@ class UC18 {
             const charactersList = this.parseRequest(request);
             this.sendCharactersListToWorker(charactersList);
           } catch (error) {
-            this.sendAbortSignalToWorker(error.message);
+            this.sendAbortSignalToWorker((error as Error).message);
           }
         }
   

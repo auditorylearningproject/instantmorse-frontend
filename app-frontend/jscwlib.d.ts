@@ -1,0 +1,1 @@
+declare module "*"; // allows us to use jscwlib without any TypeScript typings.
