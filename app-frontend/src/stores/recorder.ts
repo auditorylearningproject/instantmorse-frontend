@@ -3,9 +3,10 @@ import { ref, type Ref } from 'vue'
 
 
 export interface Clip {
-  name: string;
+  id?: number;
   audio: Blob;
   transcription?: string;
+  name?: string;
 }
 
 export const useAudioStore = defineStore('recordings', () => {
@@ -15,7 +16,10 @@ export const useAudioStore = defineStore('recordings', () => {
       recordings.value.length = 0;
     }
     function addRecording(recording: Clip) {
-        recordings.value.push({name:"", audio:recording.audio});
+        if (recording.id === undefined) {
+          recording.id = recordings.value.length;
+        }
+        recordings.value.push(recording); //{name:"", audio:recording.audio}
     }
 
     function getRecording(id: number): Clip | undefined {

@@ -4,6 +4,7 @@ import RecordView from '@/views/RecordView.vue'
 import AudioPlayerVue from '@/views/AudioPlayer.vue'
 import AuthenticationView from '@/views/AuthenticationView.vue'
 import RegistrationView from '@/views/RegistrationView.vue'
+import LessonViewVue from '@/views/LessonView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -28,6 +29,12 @@ const router = createRouter({
       name: 'record',
       meta: { layout: 'BlankLayout', pageTitle: "Recorder Widget"},
       component: RecordView
+    },
+    {
+      path: '/lesson',
+      name: 'lesson-page',
+      meta: { layout: 'BlankLayout', pageTitle: "Lesson Page"},
+      component: LessonViewVue
     },
     {
       path: '/cw-widget',

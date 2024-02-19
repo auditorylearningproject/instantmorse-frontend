@@ -27,16 +27,29 @@
         <button @click="pause">pause</button>
         <button @click="stop">stop</button>
     </div>
+    <div ref="player"></div>
 </template>
 
 <script lang = "ts" setup>
 import { onMounted, ref, watch, type Ref, computed, type ComputedRef } from "vue"
+import { jscw } from "./jscwlib.js"
 
 const AudioPlayerExample: Ref<HTMLAudioElement | null> = ref(null)
 
+<<<<<<< HEAD
 const audioctx = new Audio
+=======
+const player = ref(null)
+
+function setup_jscw(){
+    jscw_var.setWpm(30);
+    jscw_var.setText("hello"); // We should have some reparate component that allows us to pass the text in as a param
+    jscw_var.renderPlayer(player.value, jscw_var); // replace this with custom Vue UI
+}
+>>>>>>> b04a45b4a28d82d4de7797243a69ed98eeca13f6
 
 onMounted(() => {
+    setup_jscw();
     if (AudioPlayerExample?.value) {
         currentTime = computed(() => { return AudioPlayerExample.value!.currentTime }); 
            //error above: Cannot invoke an object which is possibly 'null'.ts(2721)
@@ -44,7 +57,7 @@ onMounted(() => {
         
 }
 });
-    
+    let jscw_var = new jscw()
     let seekValue = ref(0);
     let currentTime = ref(0);
     const url = "https://github.com/rafaelreis-hotmart/Audio-Sample-files/raw/master/sample.mp3"

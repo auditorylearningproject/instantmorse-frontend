@@ -17,6 +17,7 @@ import HelloWorld from '../components/HelloWorld.vue'
         <RouterLink to="/select-course-session">Course Session Select Demo</RouterLink>
         <RouterLink to="/record">Record Speech Demo</RouterLink>
         <RouterLink to="/cw-widget">CW Player Widget Demo</RouterLink>
+        <RouterLink to="/lesson">NEW - Lesson Demo</RouterLink>
       </nav>
     </div>
   </header>
