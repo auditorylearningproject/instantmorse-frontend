@@ -9,30 +9,19 @@
     <section class="main-controls">
       <!--<canvas class="visualizer" height="60px"></canvas> -->
       <div id="buttons">
-        <button class="record" @click="startRecording">Record</button>
-        <button class="stop" @click="stopRecording">Stop</button>
+        <button class="record" @click="recorderController.startRecording">Record</button>
+        <button class="stop" @click="recorderController.stopRecording">Stop</button>
       </div>
     </section>
 
     <section v-show="showSoundClips" class="sound-clips" ref="pElementRef">
-      <span v-if="allClips.length === 0">You have no sound clips recorded.</span>
-      <article v-for="(clip, index) in allClips" :key="index" class="clip">
-        <audio controls :src="getAudioURL(clip.audio)"></audio>
+      <span v-if="recorderController.allClips.length === 0">You have no sound clips recorded.</span>
+      <article v-for="(clip, index) in recorderController.allClips" :key="index" class="clip">
+        <audio controls :src="recorderController.getAudioURL(clip.audio)"></audio>
         <p>{{ clip.name }}</p>
         <span v-if="clip.transcription">{{ clip.transcription }}</span>
-        <button @click="deleteRecording(index)">Delete</button>
-        <button @click="(event) => {
-            transcriber.transcribe(index)
-      .then(result => {
-          // Handle the result here
-          console.log('Async result:', result);
-          clip.transcription = result;
-      })
-      .catch(error => {
-          // Handle errors
-          console.error('Async error:', error);
-      });
-        }">Transcribe</button>
+        <button @click="recorderController.deleteRecording(index)">Delete</button>
+        <button @click="transcriber.transcribe(index)">Transcribe</button>
       </article>
     </section>
     
@@ -43,117 +32,11 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, watch, reactive, onMounted, type Ref } from 'vue'
-import { useAudioStore } from '@/stores/recorder';
-import { Transcriber } from './speech_to_text'
-
-const transcriber = new Transcriber();
-
-interface Clip {
-  name: string;
-  audio: Blob;
-}
-
-const pElementRef = ref()
-
-let callbackRecordStop: () => void;
-
-function startRecording(){
-  mediaRecorder.start();
-}
-function stopRecording(){
-  mediaRecorder.stop();
-  console.log(mediaRecorder.state);
-}
-function captureMediaStream(stream: MediaStream){
-  mediaRecorder = new MediaRecorder(stream, {audioBitsPerSecond: 48000 });
-
-  mediaRecorder.ondataavailable = (e) => {
-  data.push(e.data);
-  };
-  callbackRecordStop()
-
-}
-
-function deleteRecording(index: number) {
-  //allClips.value.splice(index, 1);
-  store.clearRecordings();
-}
-
-function getAudioURL(clip: Blob): string {
-  return URL.createObjectURL(new Blob([clip], { type: "audio/ogg; codecs=opus" }));
-}
-
-onMounted(() => {
-  callbackRecordStop = function() {
-    mediaRecorder.onstop = (e) => {
-    console.log("recorder stopped");
-
-    const clipName = prompt("Enter a name for your sound clip");
-    if(clipName === null) {
-      alert("Recording not saved.");
-    }
-    else {
-      const isChrome = navigator.userAgent.indexOf("Chrome") !== -1;
-
-      const audioFormat = isChrome ? "webm" : "ogg";
-
-      store.addRecording({
-      name: clipName,
-      audio: new Blob(data, { type: `audio/${audioFormat}; codecs=opus` })
-      });      // const clipContainer = document.createElement("article");
-      // const clipLabel = document.createElement("p");
-      // const audio = document.createElement("audio");
-      // const deleteButton = document.createElement("button");
-
-      // clipContainer.classList.add("clip");
-      // audio.setAttribute("controls", "");
-      // deleteButton.innerHTML = "Delete";
-      // clipLabel.innerHTML = clipName;
-
-      // clipContainer.appendChild(audio);
-      // clipContainer.appendChild(clipLabel);
-      // clipContainer.appendChild(deleteButton);
-      // pElementRef.value.appendChild(clipContainer);
-
-      // const blob = new Blob(data, { type: "audio/ogg; codecs=opus" });
-      // data.length = 0
-      // const audioURL = window.URL.createObjectURL(blob);
-      // audio.src = audioURL;
-
-
-    } 
-    data.length = 0;
-
-    };};
-
-  })
-
-const showSoundClips = ref(true)
-
-let mediaRecorder: MediaRecorder;
-
-let data: Blob[] = []
-const store = useAudioStore();
-const allClips = reactive(store.recordings);
-
-
-if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-  console.log("getUserMedia supported.");
-  navigator.mediaDevices
-    .getUserMedia({
-      // constraints - only audio needed for this app
-      audio: true,
-    })
-    // Success callback
-    .then(captureMediaStream)
-    // Error callback
-    .catch((err: any) => {
-      console.error(`The following getUserMedia error occurred: ${err}`);
-    });
-} else {
-  console.log("getUserMedia not supported on your browser!");
-}
+import { computed, ref } from "vue";
+import { Transcriber, useRecorder } from "./speech_to_text"
+  const transcriber = new Transcriber()
+  const recorderController = useRecorder(computed(() => ""));
+  const showSoundClips = ref(true)
 
 </script>
 
