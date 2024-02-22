@@ -21,9 +21,10 @@
     </audio>
     <p>{{ currentTime }}</p>
     <div>
-        <button @click="play">play</button>
+        <!-- <button @click="play">play</button> -->
         <button @click="pause">pause</button>
         <button @click="stop">stop</button>
+        <button @click="download">download</button>
     </div>
     <div ref="player"></div>
 </template>
@@ -46,7 +47,7 @@ function setup_jscw() {
 onMounted(() => {
     setup_jscw();
     if (AudioPlayerExample?.value) {
-        currentTime = computed(() => { return AudioPlayerExample.value!.currentTime }); 
+        // currentTime = computed(() => { return AudioPlayerExample.value!.currentTime }); 
            //error above: Cannot invoke an object which is possibly 'null'.ts(2721)
 
         
@@ -57,22 +58,28 @@ onMounted(() => {
     let currentTime = ref(0);
     const url = "https://github.com/rafaelreis-hotmart/Audio-Sample-files/raw/master/sample.mp3"
 
-    function play() {
-        AudioPlayerExample.value!.play();
-    }    
+    // function play() {
+        // AudioPlayerExample.value!.play();
+        // jscw_var.play();
+    // }    
     function pause() {
-        AudioPlayerExample.value!.pause();
+        // AudioPlayerExample.value!.pause();
+        jscw_var.pause();
     }
     function stop() {
-        AudioPlayerExample.value!.pause();
-        AudioPlayerExample.value!.currentTime = 0;
+        // AudioPlayerExample.value!.pause();
+        jscw_var.stop();
+        // AudioPlayerExample.value!.currentTime = 0;
     }
-    watch(seekValue, (seek) => {
-        (AudioPlayerExample.value as HTMLAudioElement).fastSeek(seek)
-    });
-    function updateTime(){
-        currentTime.value = AudioPlayerExample.value!.currentTime
+    function download() {
+        jscw_var.refresh_download_link();
     }
+    // watch(seekValue, (seek) => {
+    //     (AudioPlayerExample.value as HTMLAudioElement).fastSeek(seek)
+    // });
+    // function updateTime(){
+    //     currentTime.value = AudioPlayerExample.value!.currentTime
+    // }
 
         // onPlaying() {
         //     if (!this) {
