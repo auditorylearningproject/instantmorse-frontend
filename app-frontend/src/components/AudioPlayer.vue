@@ -13,12 +13,13 @@
         character=""
         v-model="seekValue"
     />
-    <audio @timeupdate="updateTime"
+<!--  <audio @timeupdate="updateTime"
         ref="AudioPlayerExample"
     ><source :src="url"  />
         Your browser does not support the
         <code>audio</code> element.
     </audio>
+    -->
     <p>{{ currentTime }}</p>
     <div>
         <!-- <button @click="play">play</button> -->
