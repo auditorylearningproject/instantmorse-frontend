@@ -65,7 +65,7 @@
 <style scoped>
 header {
     height: 70px;
-    padding-left: 40%;
+    text-align: center;
 }
 .authentication {
     padding-left: 40%;
