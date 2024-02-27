@@ -5,9 +5,9 @@
         </header>
             <form @submit.prevent="submitForm">
                 <label for="user">Username:</label><br>
-                <input v-model="username"  id="user" type="text" placeholder="Username" required><br>
+                <input v-model="userName"  id="user" type="text" placeholder="Username" required><br>
                 <label for="pass">Password:</label><br>
-                <input v-model="password" id="pass" type="text" placeholder="Password" required><br><br>
+                <input v-model="passWord" id="pass" type="text" placeholder="Password" required><br><br>
                 <button class="submit">Submit</button> <br><br>
             </form>
     </div>
@@ -23,32 +23,35 @@
     export default {
         data() {
             return {
-                username: '',
-                password: ''
+                userName: '',
+                passWord: ''
             };
         },
         methods: {
             async submitForm() {
-                console.log("Submit was clicked. Now awaiting a response");
+                console.log("Submit was clicked.");
                 const url = location.origin;
                 try {
-                    axios.post(url+"/api/authentication/login", {
-                        username: this.username,
-                        password: this.password
+                    const response = await axios.post(url+"/api/authentication/login", {
+                        username: this.userName,
+                        password: this.passWord,
                     },
                     {
-                       timeout: 2000 
-                    })
-                    .then((response) => {
-                        if (response.data !== null) {
-                            this.$router.push('/');
-                        } else {
-                            location.reload();
-                        }
+                       timeout: 3000,
                     });
-                } catch(timeout) {
-                    console.log("Timed out");
-                }
+                    if (response.data !== null) { //figure out JWT token thing
+                        this.$router.push('/');
+                        console.log("Rerouting, hang on!")
+                    } else {
+                        location.reload();
+                    }
+                    } catch (err: any) {
+                        if (err.code === 'ECONNABORTED') {
+                        console.log('The request timed out.');
+                        } else {
+                        console.log(err);
+                        }
+                    }
             },
             async linkToRegister() {
                 console.log("Registration was clicked. Rerouting to the Registration Page");
