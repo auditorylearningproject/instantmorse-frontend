@@ -38,8 +38,11 @@
                     },
                     {
                        timeout: 3000,
-                    });
-                    if (response.data !== null) { //figure out JWT token thing
+                    })
+                    .then(response => {
+                        console.log(response.data);
+                    })
+                    if (response !== null) { //figure out JWT token thing
                         this.$router.push('/');
                         console.log("Rerouting, hang on!")
                     } else {
