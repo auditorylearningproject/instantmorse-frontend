@@ -3,41 +3,67 @@
         <header>
             <h1>Registration Page</h1>
         </header>
-
-        <section class='user_pass'>
-            <div id="username">
-                <label for="user">Username:</label><br>
-                <input id="user" name="user" type="text"><br>
-            </div>
-            <div id="password">
-                <label for="pass">Password</label><br>
-                <input id="pass" name="pass" type="text"><br><br>
-            </div>
-        </section>
-        <section class="submitButton">
-            <div id="buttons">
-                <button class="submit" @click="submit">Submit</button>
-            </div>
-        </section>
+        <form @submit.prevent="register">
+            <label for="user">Username:</label><br>
+            <input v-model="userName"  id="user" type="text" placeholder="Username" required><br>
+            <label for="pass">Password:</label><br>
+            <input v-model="passWord" id="pass" type="text" placeholder="Password" required><br><br>
+            <button class="submit">Submit</button> <br><br>
+        </form>
     </div>
 </template>
 
-<script lang="ts" setup>
-function submit() {
-
-}
+<script lang="ts">
+import axios from 'axios';
+    export default {
+        data() {
+            return {
+                userName: '',
+                passWord: ''
+            };
+        },
+        methods: {
+            async register() {
+                console.log("Submit was clicked.Registration in progress.");
+                const url = location.origin;
+                try {
+                    const response = await axios.put(url+"/api/authentication/register", {
+                        username: this.userName,
+                        password: this.passWord,
+                    },
+                    {
+                       timeout: 5000,
+                    })
+                    console.log(response);
+                    if (response.data !== null) { //pull from database
+                        this.$router.push('/authentication');
+                        console.log("Rerouting to the login page!")
+                    } else {
+                        location.reload();
+                    }
+                    } catch (err: any) {
+                        if (err.code === 'ECONNABORTED') {
+                        console.log('The request timed out.');
+                        } else {
+                        console.log(err);
+                        }
+                    }
+            },
+        },
+    };
 </script>
 
 <style scoped>
 header {
     height: 70px;
+    text-align: center;
 }
 
-.user-pass {
-    box-sizing: border-box;
+.registration {
+    padding-left: 40%;
 }
 
-.submitButton {
+.submit {
     color: #000000;
 }
 </style>

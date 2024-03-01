@@ -39,10 +39,7 @@
                     {
                        timeout: 3000,
                     })
-                    .then(response => {
-                        console.log(response.data);
-                    })
-                    if (response !== null) { //figure out JWT token thing
+                    if (response.data !== null) { //pull from database
                         this.$router.push('/');
                         console.log("Rerouting, hang on!")
                     } else {
