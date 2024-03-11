@@ -5,6 +5,7 @@ import AudioPlayerVue from '@/views/AudioPlayer.vue'
 import AuthenticationView from '@/views/AuthenticationView.vue'
 import RegistrationView from '@/views/RegistrationView.vue'
 import LessonViewVue from '@/views/LessonView.vue'
+import LessonSelect from '@/components/LessonSelect.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -53,6 +54,12 @@ const router = createRouter({
       name: 'Registration',
       meta: { layout: 'BlankLayout', pageTitle: "Registration Page" },
       component: RegistrationView
+    },
+    {
+      path: '/lessonSelect',
+      name: 'SelectLesson',
+      meta: { layout: 'BlankLayout', pageTitle: "Select Lesson Page" },
+      component: LessonSelect
     },
     {
       path: '/:catchAll(.*)',
