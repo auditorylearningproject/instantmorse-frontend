@@ -39,6 +39,7 @@ const playerValue = ref(0);
 const playerSecString = ref("");
 const playerMinString = ref("");
 const player = ref(null);
+const emit = defineEmits(['playbackFinished']);
 
 function setup_jscw() {
     jscw_var.setWpm(30);
@@ -94,6 +95,9 @@ function updatePlayTime(max: number, value: number) {
     
     if (playerValue.value >= 0) {
         playerMinString.value = String(Math.floor(playerValue.value / 60));
+    }
+    if (playerValue.value == playerMax.value) {
+        emit('playbackFinished');
     }
 }
 
