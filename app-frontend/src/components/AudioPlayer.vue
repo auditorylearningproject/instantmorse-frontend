@@ -1,18 +1,9 @@
 <template>
-    <input
-        type="range"
-        min="0"
-        max="100"
-        step="1"
-        wpm="20"
-        frequency="600"
-        playlength="0"
-        playstart="0"
-        playend="0"
-        text=""
-        character=""
-        v-model="seekValue"
-    />
+    <progress
+        :max="playerMax"
+        :value="playerValue"
+        readonly
+    ></progress>
 
     <p>{{playerMinString + ":" + playerSecString + " / " + playerMaxMinute.toFixed(0) + ":" + playerMaxSecTens.toFixed(0) + playerMaxSecOnes.toFixed(0)}}</p>
 
@@ -54,9 +45,11 @@ function updatePlayTime(max: number, value: number) {
     playerMaxSecOnes.value = playerMaxSec.value % 10;
     playerMaxSecTens.value = Math.floor(playerMaxSec.value / 10);
     playerMaxMinute.value = Math.floor(playerMax.value / 60);
-    playerValue.value = Math.ceil(value);
-    if (playerValue.value >= 0) {
-        switch (playerValue.value % 60){
+    playerValue.value = value;
+    const intPlayerValue = Math.ceil(value);
+    //playerValue.value = Math.ceil(value);
+    if (intPlayerValue >= 0) {
+        switch (intPlayerValue % 60){
             case 0: 
                 playerSecString.value = "00";
                 break;
@@ -88,12 +81,12 @@ function updatePlayTime(max: number, value: number) {
                 playerSecString.value = "09";
                 break;
             default:
-                playerSecString.value = String(playerValue.value % 60);
+                playerSecString.value = String(intPlayerValue % 60);
         }
     }
     
-    if (playerValue.value >= 0) {
-        playerMinString.value = String(Math.floor(playerValue.value / 60));
+    if (intPlayerValue >= 0) {
+        playerMinString.value = String(Math.floor(intPlayerValue / 60));
     }
     if (max === value && value !== 0) {
         emit('playbackFinished');
