@@ -29,7 +29,6 @@ import { onMounted, ref, watch, type Ref, computed, type ComputedRef } from "vue
 import { jscw } from "./jscwlib.js"
 import { setTextRange } from "typescript";
 import { timeStamp } from "console";
-import {formatjs} from "https://formatjs.io/docs/polyfills/intl-numberformat"
 const playerMax = ref(0);
 const playerMaxSec = ref(0);
 const playerMaxSecOnes = ref(0);
@@ -96,7 +95,7 @@ function updatePlayTime(max: number, value: number) {
     if (playerValue.value >= 0) {
         playerMinString.value = String(Math.floor(playerValue.value / 60));
     }
-    if (playerValue.value == playerMax.value) {
+    if (max === value && value !== 0) {
         emit('playbackFinished');
     }
 }
