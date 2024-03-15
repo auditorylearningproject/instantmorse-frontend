@@ -3,15 +3,17 @@ import axios from 'axios';
 import { type AxiosResponse } from 'axios';
 //import type { Store } from 'pinia';
 
+export type { Clip }
+
 let store: ReturnType<typeof useAudioStore>;
+
 
 // const DefaultSpeechRecognitionUrl = "https://www.google.com/speech-api/v1/recognize?xjerr=1&client=chromium&lang=" + lang;
 const lang = "en-US" //RFC5646 language tag
-let currentLetter: string;
 
 export class Transcriber{
 
-    async transcribe(audioID: number): Promise<string> {
+    async transcribe(audioID: number): Promise<string[]> {
         const recording = (store.getRecording(audioID) as Clip).audio as Blob 
 
         try {
@@ -29,7 +31,7 @@ export class Transcriber{
     }
 
 
-  private async sendRecordingRequest(recording: Blob): Promise<string> {
+  private async sendRecordingRequest(recording: Blob): Promise<string[]> {
       try {
           // Extract content type from recording.value (e.g., "audio/ogg; codecs=opus")
         //  const contentType = recording.type.split('/')[1].split().trim();
@@ -54,10 +56,16 @@ export class Transcriber{
                   }
               }
           );
-          console.log(response.data.transcript)
+          if (typeof response.data == 'string'){
+            return [response.data]
+          }else if(Array.isArray(response.data) && response.data.every(item => 'transcript' in item && 'confidence' in item)){
+            const transcripts: string[] = response.data.map(item => item.transcript);
+            return transcripts;
+          }else{
+            throw new Error('I have no idea what the API returned!');
+          }
                       //'Content-Disposition': 'attachment; filename=recording', // Optional
           // Assuming the API response contains the transcribed text
-          return response.data.transcript as string;
       } catch (error) {
         if (error instanceof Error && error.message) {
           throw new Error('Error sending recording request: ' + error.message);
@@ -93,21 +101,33 @@ function callbackMediaStreamReady(){
   }
 }
 
+export enum RecorderEventType {
+  RecordingStarted = "recording-started",
+  RecordingStopped = "recording-stopped",
+  RecordingPaused = "recording-paused",
+}
+
+// Define type for callback function
+type RecorderEventCallback = (eventType: RecorderEventType | [Clip, number]) => void;
+
 //Composable function - able to react to state changes
-export function useRecorder(currentLetter: ComputedRef<string>){
+export function useRecorder(currentLetter: ComputedRef<string>, eventCallback: RecorderEventCallback){
 
 //  const currentLetter = possibleNullCurrentLetter !== null ? possibleNullCurrentLetter.value : 'defaultValue';
 
   const recorderController = new RecorderController(toValue(currentLetter))
   if(toValue(currentLetter) !== ""){
     watchEffect(() => {
-      //the letter changed. Start recording immediately.
-      recorderController.currentLetter = toValue(currentLetter);
-      if(recorderController.mediaRecorder){
-        recorderController.startRecording();
-      }else{
-        shouldStartImmediately = recorderController;
-      }
+      //COMMENTED OUT CODE: This was used to begin recording as soon as the letter changed. Now, we call beginRecording()
+      //  to wait until the cw player had time to finish playing.
+    //   if(recorderController.begin){
+       recorderController.currentLetter = toValue(currentLetter);
+    //   if(recorderController.mediaRecorder){
+    //     recorderController.startRecording();
+    //   }else{
+    //     shouldStartImmediately = recorderController;
+    //   }
+    // }
     })
   }
 
@@ -126,11 +146,17 @@ export function useRecorder(currentLetter: ComputedRef<string>){
         const isChrome = navigator.userAgent.indexOf("Chrome") !== -1;
   
         const audioFormat = isChrome ? "webm" : "ogg";
+        const recording = new Blob(recorderController.data, { type: `audio/${audioFormat}; codecs=opus` });
+        const recording_clip = {
+          name: recorderController.currentLetter,
+          audio: recording
+          }
+
         console.log(":::", recorderController.currentLetter);
-        store.addRecording({
-        name: recorderController.currentLetter,
-        audio: new Blob(recorderController.data, { type: `audio/${audioFormat}; codecs=opus` })
-        });      // const clipContainer = document.createElement("article");
+        store.addRecording(recording_clip);      
+        
+        eventCallback([recording_clip, (this.firstNoiseTimestamp! - this.beginRecordTimestamp!)]); // Emit recording started event
+        // const clipContainer = document.createElement("article");
         // const clipLabel = document.createElement("p");
         // const audio = document.createElement("audio");
         // const deleteButton = document.createElement("button");
@@ -162,11 +188,12 @@ export function useRecorder(currentLetter: ComputedRef<string>){
 }
 
 class RecorderController{
-
   public currentLetter: string;
 
   public currentStore = store;
 
+  firstNoiseTimestamp: number | null = null;
+  beginRecordTimestamp: number | null = null;
   // watchEffect(() => {
   //   //the audio file changed?
   // })
@@ -182,16 +209,25 @@ class RecorderController{
   pElementRef = ref();
   callbackRecordStop?: () => void;
   
-  //let callbackRecordStop: () => void;
-  
+  beginRecording(){ //only called by the Lesson View.
+    console.log("BEGIN RECORDING!");
+      if(this.mediaRecorder){
+        this.startRecording();
+        console.log("THIS.STARTRECORDING CALLED.")
+      }else{
+        shouldStartImmediately = this;
+      }
+  }
   startRecording(){
+    this.beginRecordTimestamp = performance.now();
+    this.firstNoiseTimestamp = null;
     this.mediaRecorder!.start(200); // this makes the ondataavailable function get called every 200ms or when the recording stops.
     this.audioContext.resume();
    // this.detectSilence();
   }
   stopRecording(){
     if(this.mediaRecorder?.state === 'recording'){
-      this.mediaRecorder!.stop();
+      this.mediaRecorder!.stop(); // triggers callbackRecordStop
       console.log(this.mediaRecorder!.state);
       this.stopSilenceDetection();
       
@@ -346,6 +382,9 @@ class RecorderController{
         }
       } else {
         this.noiseDetected = true
+        if(!this.firstNoiseTimestamp){
+          this.firstNoiseTimestamp = performance.now();
+        }
         // Reset the timeout when there's noise
         if (this.silenceTimeout !== null) {
           window.clearTimeout(this.silenceTimeout);

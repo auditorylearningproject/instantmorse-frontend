@@ -43,7 +43,7 @@ const emit = defineEmits(['playbackFinished']);
 
 function setup_jscw() {
     jscw_var.setWpm(30);
-    jscw_var.setText("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Cras fermentum odio eu feugiat pretium. Euismod quis viverra nibh cras pulvinar mattis nunc. At urna condimentum mattis pellentesque id nibh tortor id. Nunc lobortis mattis aliquam faucibus purus. Ut porttitor leo a diam sollicitudin tempor. Cras fermentum odio eu feugiat pretium.");
+    jscw_var.setText("Lorem");// ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Cras fermentum odio eu feugiat pretium. Euismod quis viverra nibh cras pulvinar mattis nunc. At urna condimentum mattis pellentesque id nibh tortor id. Nunc lobortis mattis aliquam faucibus purus. Ut porttitor leo a diam sollicitudin tempor. Cras fermentum odio eu feugiat pretium.");
     jscw_var.setCallback(updatePlayTime);
     jscw_var.startLoop();
     jscw_var.renderPlayer(player.value, jscw_var);
