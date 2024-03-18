@@ -3,13 +3,13 @@
         <header>
             <h1>Authentication Page</h1>
         </header>
-            <form @submit.prevent="submitForm">
-                <label for="user">Username:</label><br>
-                <input v-model="username"  id="user" type="text" placeholder="Username" required><br>
-                <label for="pass">Password:</label><br>
-                <input v-model="password" id="pass" type="text" placeholder="Password" required><br><br>
-                <button class="submit">Submit</button> <br><br>
-            </form>
+        <form @submit.prevent="submitForm">
+            <label for="user">Username:</label><br>
+            <input v-model="userName"  id="user" type="text" placeholder="Username" required><br>
+            <label for="pass">Password:</label><br>
+            <input v-model="passWord" id="pass" type="text" placeholder="Password" required><br><br>
+            <button class="submit">Submit</button> <br><br>
+        </form>
     </div>
     <div class="toRegistration">
         <form @submit.prevent="linkToRegister">
@@ -23,32 +23,35 @@
     export default {
         data() {
             return {
-                username: '',
-                password: ''
+                userName: '',
+                passWord: ''
             };
         },
         methods: {
             async submitForm() {
-                console.log("Submit was clicked. Now awaiting a response");
+                console.log("Submit was clicked.");
                 const url = location.origin;
                 try {
-                    axios.post(url+"/api/authentication/login", {
-                        username: this.username,
-                        password: this.password
+                    const response = await axios.post(url+"/api/authentication/login", {
+                        username: this.userName,
+                        password: this.passWord,
                     },
                     {
-                       timeout: 2000 
+                       timeout: 3000,
                     })
-                    .then((response) => {
-                        if (response.data !== null) {
-                            this.$router.push('/');
+                    if (response.data !== null) { //pull from database
+                        this.$router.push('/');
+                        console.log("Rerouting, hang on!")
+                    } else {
+                        location.reload();
+                    }
+                    } catch (err: any) {
+                        if (err.code === 'ECONNABORTED') {
+                        console.log('The request timed out.');
                         } else {
-                            location.reload();
+                        console.log(err);
                         }
-                    });
-                } catch(timeout) {
-                    console.log("Timed out");
-                }
+                    }
             },
             async linkToRegister() {
                 console.log("Registration was clicked. Rerouting to the Registration Page");
@@ -65,7 +68,7 @@
 <style scoped>
 header {
     height: 70px;
-    padding-left: 40%;
+    text-align: center;
 }
 .authentication {
     padding-left: 40%;

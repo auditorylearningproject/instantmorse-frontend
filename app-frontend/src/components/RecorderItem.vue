@@ -35,7 +35,7 @@
 import { computed, ref } from "vue";
 import { Transcriber, useRecorder } from "./speech_to_text"
   const transcriber = new Transcriber()
-  const recorderController = useRecorder(computed(() => ""));
+  const recorderController = useRecorder(computed(() => ""), () => {});
   const showSoundClips = ref(true)
 
 </script>

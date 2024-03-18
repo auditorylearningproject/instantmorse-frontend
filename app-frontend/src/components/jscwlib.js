@@ -658,6 +658,9 @@ export class jscw {
         this.text = "";
         this.paused = true;
         this.progressbar = false;
+        this.max = 100;
+        this.value = 0;
+        this.callbackFunction = function(){}; //callback to AudioPlayer.vue
         this.mode = 'audio'; // audio: AudioContext, embed: <audio> tag
         this.cgiurl = "https://cgi2.lcwo.net/cgi-bin/";
         this.real = false; // If set to true, use Real speed, not PARIS
@@ -1476,6 +1479,10 @@ export class jscw {
             window.setInterval(this.progressbarUpdate, 100, this);
         };
 
+        this.startLoop = function () {
+            window.setInterval(this.progressbarUpdate2, 50, this);
+        }
+
         this.progressbarUpdate = function (obj) {
             if (obj.progressbar) {
                 if (obj.mode == 'audio') {
@@ -1513,6 +1520,20 @@ export class jscw {
                 }
             }
         };
+
+        this.progressbarUpdate2 = function(obj) {
+            const max = obj.getLength();
+            const value = obj.getLength() - obj.getRemaining();
+            if (obj.max != max || obj.value != value) {
+                obj.callbackFunction(max, value);
+            }
+            obj.max = max;
+            obj.value = value;
+        }
+
+        this.setCallback = function(func) {
+            this.callbackFunction = func;
+        }
 
         this.fmtTime = function (sec, sign) {
             var min = 0;

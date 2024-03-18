@@ -3,15 +3,16 @@ import axios from 'axios';
 import { type AxiosResponse } from 'axios';
 //import type { Store } from 'pinia';
 
+export type { Clip }
+
 let store: ReturnType<typeof useAudioStore>;
 
 // const DefaultSpeechRecognitionUrl = "https://www.google.com/speech-api/v1/recognize?xjerr=1&client=chromium&lang=" + lang;
 const lang = "en-US" //RFC5646 language tag
-let currentLetter: string;
 
 export class Transcriber{
 
-    async transcribe(audioID: number): Promise<string> {
+    async transcribe(audioID: number): Promise<string[]> {
         const recording = (store.getRecording(audioID) as Clip).audio as Blob 
 
         try {
@@ -29,7 +30,7 @@ export class Transcriber{
     }
 
 
-  private async sendRecordingRequest(recording: Blob): Promise<string> {
+  private async sendRecordingRequest(recording: Blob): Promise<string[]> {
       try {
           // Extract content type from recording.value (e.g., "audio/ogg; codecs=opus")
         //  const contentType = recording.type.split('/')[1].split().trim();
@@ -54,10 +55,16 @@ export class Transcriber{
                   }
               }
           );
-          console.log(response.data.transcript)
+          if (typeof response.data == 'string'){
+            return [response.data]
+          }else if(Array.isArray(response.data) && response.data.every(item => 'transcript' in item && 'confidence' in item)){
+            const transcripts: string[] = response.data.map(item => item.transcript);
+            return transcripts;
+          }else{
+            throw new Error('I have no idea what the API returned!');
+          }
                       //'Content-Disposition': 'attachment; filename=recording', // Optional
           // Assuming the API response contains the transcribed text
-          return response.data.transcript as string;
       } catch (error) {
         if (error instanceof Error && error.message) {
           throw new Error('Error sending recording request: ' + error.message);
@@ -93,21 +100,33 @@ function callbackMediaStreamReady(){
   }
 }
 
+export enum RecorderEventType {
+  RecordingStarted = "recording-started",
+  RecordingStopped = "recording-stopped",
+  RecordingPaused = "recording-paused",
+}
+
+// Define type for callback function
+type RecorderEventCallback = (eventType: RecorderEventType | [Clip, number]) => void;
+
 //Composable function - able to react to state changes
-export function useRecorder(currentLetter: ComputedRef<string>){
+export function useRecorder(currentLetter: ComputedRef<string>, eventCallback: RecorderEventCallback){
 
 //  const currentLetter = possibleNullCurrentLetter !== null ? possibleNullCurrentLetter.value : 'defaultValue';
 
   const recorderController = new RecorderController(toValue(currentLetter))
   if(toValue(currentLetter) !== ""){
     watchEffect(() => {
-      //the letter changed. Start recording immediately.
-      recorderController.currentLetter = toValue(currentLetter);
-      if(recorderController.mediaRecorder){
-        recorderController.startRecording();
-      }else{
-        shouldStartImmediately = recorderController;
-      }
+      //COMMENTED OUT CODE: This was used to begin recording as soon as the letter changed. Now, we call beginRecording()
+      //  to wait until the cw player had time to finish playing.
+    //   if(recorderController.begin){
+       recorderController.currentLetter = toValue(currentLetter);
+    //   if(recorderController.mediaRecorder){
+    //     recorderController.startRecording();
+    //   }else{
+    //     shouldStartImmediately = recorderController;
+    //   }
+    // }
     })
   }
 
@@ -126,11 +145,17 @@ export function useRecorder(currentLetter: ComputedRef<string>){
         const isChrome = navigator.userAgent.indexOf("Chrome") !== -1;
   
         const audioFormat = isChrome ? "webm" : "ogg";
+        const recording = new Blob(recorderController.data, { type: `audio/${audioFormat}; codecs=opus` });
+        const recording_clip = {
+          name: recorderController.currentLetter,
+          audio: recording
+          }
+
         console.log(":::", recorderController.currentLetter);
-        store.addRecording({
-        name: recorderController.currentLetter,
-        audio: new Blob(recorderController.data, { type: `audio/${audioFormat}; codecs=opus` })
-        });      // const clipContainer = document.createElement("article");
+        store.addRecording(recording_clip);      
+        
+        eventCallback([recording_clip, (this.firstNoiseTimestamp! - this.beginRecordTimestamp!)]); // Emit recording started event
+        // const clipContainer = document.createElement("article");
         // const clipLabel = document.createElement("p");
         // const audio = document.createElement("audio");
         // const deleteButton = document.createElement("button");
@@ -162,11 +187,12 @@ export function useRecorder(currentLetter: ComputedRef<string>){
 }
 
 class RecorderController{
-
   public currentLetter: string;
 
   public currentStore = store;
 
+  firstNoiseTimestamp: number | null = null;
+  beginRecordTimestamp: number | null = null;
   // watchEffect(() => {
   //   //the audio file changed?
   // })
@@ -177,21 +203,34 @@ class RecorderController{
   analyser!: AnalyserNode;
   silenceTimeout: number | null = null;
   silenceThreshold = 100; //frequency in Hz
+  audioLoopSize = 100;
+
+  micSensitivity = 0.003;
 
   
   pElementRef = ref();
   callbackRecordStop?: () => void;
   
-  //let callbackRecordStop: () => void;
-  
+  beginRecording(){ //only called by the Lesson View.
+    console.log("BEGIN RECORDING!");
+      if(this.mediaRecorder){
+        this.startRecording();
+        console.log("THIS.STARTRECORDING CALLED.")
+      }else{
+        shouldStartImmediately = this;
+      }
+  }
   startRecording(){
-    this.mediaRecorder!.start(200); // this makes the ondataavailable function get called every 200ms or when the recording stops.
+    this.lastEnd = 0;
+    this.beginRecordTimestamp = performance.now();
+    this.firstNoiseTimestamp = null;
+    this.mediaRecorder!.start(this.audioLoopSize); // this makes the ondataavailable function get called every audioLoopSize milliseconds, or when the recording stops.
     this.audioContext.resume();
    // this.detectSilence();
   }
   stopRecording(){
     if(this.mediaRecorder?.state === 'recording'){
-      this.mediaRecorder!.stop();
+      this.mediaRecorder!.stop(); // triggers callbackRecordStop
       console.log(this.mediaRecorder!.state);
       this.stopSilenceDetection();
       
@@ -201,13 +240,15 @@ class RecorderController{
     this.mediaRecorder! = new MediaRecorder(stream, {audioBitsPerSecond: this.audioBitsPerSecond });
   
     this.mediaRecorder!.ondataavailable = (e: { data: any; }) => {
-      if (e.data.size > 0 && this.mediaRecorder!.state === "recording") {
+      if (e.data.size > 500 && this.mediaRecorder!.state === "recording") {
         // Handle recorded data
         this.data.push(e.data);
         this.detectSilence();
-
+       } else if (e.data.size <= 500 ){
+          this.data.push(e.data)  
+      }else if(this.mediaRecorder!.state !== "recording"){
+        console.log("data passed after recording stopped, doing nothing.");
       }
-
     };
     this.callbackRecordStop!()
     callbackMediaStreamReady()
@@ -224,11 +265,14 @@ class RecorderController{
 
     return someArrBuff;
   }
-
-  audioBufferSlice(buffer: AudioBuffer, begin: number, end: number, callback: (arg0: ErrorCallback | unknown, audBuf: AudioBuffer) => void): void {
+  
+  lastEnd = 0;
+  
+  audioBufferSlice(buffer: AudioBuffer, audioLoopSize: number, callback: (arg0: ErrorCallback | unknown, audBuf: AudioBuffer) => void): void {
     // if (!(this instanceof this.audioBufferSlice)) {
     //   this.audioBufferSlice(buffer, begin, end, callback);
     // }
+    console.log("AUDIO BUFFER SLICE CALLED!")
   
     let error = null;
   
@@ -243,29 +287,33 @@ class RecorderController{
   
     // milliseconds to seconds
     //also, ignoring the values passed in by the function and hardcoding the last 1 second of audio if possible. Sorry.
-    begin = (duration-1)///1000;
-    end = duration///1000;
+    let end = duration*1000;/// in ms
+    let begin = this.lastEnd; /// in ms. -30000 compensates for random delays.
   
-    if (begin < 0) {
-      //error = new RangeError('begin time must be greater than 0');
-      begin = 0;
-    }
-  
-    if (end > duration) {
+    if (end > (duration*1000)) {
       //error = new RangeError('end time must be less than or equal to ' + duration);
-      end = duration;
+      end = duration*1000;
     }
-  
+    this.lastEnd = end;
+
+    // if (begin <= 0) {
+    //   //error = new RangeError('begin time must be greater than 0');
+    //   begin = ((duration*1000)-audioLoopSize) <= 0 ? 0 : ((duration*1000)-audioLoopSize)
+    // }
+    
     if (typeof callback !== 'function') {
       error = new TypeError('callback must be a function');
     }
   
-    const startOffset = rate * begin;
-    const endOffset = rate * end;
+    const startOffset = begin === 0 ? 0 : (rate * begin)/1000;
+    const endOffset = (rate * end)/1000;
     const frameCount = endOffset - startOffset;
     console.log("startoffset: ", startOffset, " endOffset: ", endOffset);
     let newArrayBuffer;
-  
+    if(frameCount < 0){
+      console.error("endoffset is smaller than startoffset! Error...");
+      return;
+    }
     try {
       newArrayBuffer = this.audioContext.createBuffer(channels, endOffset - startOffset, rate);
       const anotherArray = new Float32Array(frameCount);
@@ -285,13 +333,14 @@ class RecorderController{
   noiseDetected = false;
 
   async detectSilence() {
+    
     const buf: ArrayBuffer = await this.combineAudioBlobs();
-  
+    console.log("buf.bytelength: " + buf.byteLength);
     this.audioContext.decodeAudioData(buf, async (audioBuffer) => {
 
       const bufferPromise = new Promise<AudioBuffer>((resolve, reject) => {
         // Your existing audioBufferSlice function
-        this.audioBufferSlice(audioBuffer, -1, -1, (error, audBuf) => { // parameters -1 are ignored, see the function
+        this.audioBufferSlice(audioBuffer, this.audioLoopSize, (error, audBuf) => {
           if (error) {
             reject(error);
           } else {
@@ -330,7 +379,7 @@ class RecorderController{
       const vol = this.autoCorrelate(this.analyser, buffer, this.audioContext.sampleRate);
 
       //const averageVolume = dataArray.reduce((acc, value) => acc + value, 0) / bufferLength;
-      console.log("frequency: ", vol);
+      console.log("frequency: ", vol, " buffer slice size: ", bufferLength);
       console.log("noise detect: ", this.noiseDetected)
       //sourceNode.disconnect()
 
@@ -346,6 +395,9 @@ class RecorderController{
         }
       } else {
         this.noiseDetected = true
+        if(!this.firstNoiseTimestamp){
+          this.firstNoiseTimestamp = performance.now();
+        }
         // Reset the timeout when there's noise
         if (this.silenceTimeout !== null) {
           window.clearTimeout(this.silenceTimeout);
@@ -425,9 +477,9 @@ class RecorderController{
       sumOfSquares += val * val;
     }
     const rootMeanSquare = Math.sqrt(sumOfSquares / SIZE)
-    if (rootMeanSquare < 0.01) { //was 0.01
+    if (rootMeanSquare < this.micSensitivity && SIZE <= 10000) { //was 0.01
       return -1;
-    }
+    }//if the buffer size is big, then only a small portion of the buffer might actually be talking.
   
     // Find a range in the buffer where the values are below a given threshold.
     let r1 = 0;

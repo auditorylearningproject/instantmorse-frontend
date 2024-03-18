@@ -5,19 +5,18 @@ import HelloWorld from '../components/HelloWorld.vue'
 
 <template>
   <header>
-    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
+    <img alt="InstantMorse logo" class="logo" src="@/assets/morse-code.png" width="125" height="125" />
 
     <div class="wrapper">
-      <HelloWorld msg="InstantMorse.Codes - Iteration 1" />
+      <HelloWorld msg="InstantMorse.Codes - Learn Morse Code By Speaking!" />
 
       <nav>
         <RouterLink to="/">Home</RouterLink>
         <RouterLink to="/authentication">Login</RouterLink>
         <RouterLink to="/registration">Register</RouterLink>
-        <RouterLink to="/select-course-session">Course Session Select Demo</RouterLink>
-        <RouterLink to="/record">Record Speech Demo</RouterLink>
-        <RouterLink to="/cw-widget">CW Player Widget Demo</RouterLink>
-        <RouterLink to="/lesson">NEW - Lesson Demo</RouterLink>
+        <RouterLink to="/lesson">Default course lesson: Letters A-F</RouterLink>
+        <RouterLink to="/lessonSelect">Select Lesson (UNFINISHED)</RouterLink>
+        <RouterLink to="/statistics">User Statistics</RouterLink>
       </nav>
     </div>
   </header>
@@ -31,10 +30,6 @@ header {
   max-height: 100vh;
 }
 
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
 
 nav {
   width: 100%;
@@ -63,35 +58,34 @@ nav a:first-of-type {
 
 @media (min-width: 1024px) {
   header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
+    /* display: flex; */
+    /* place-items: center; */
+    /* padding-right: calc(var(--section-gap) / 2); */
   }
 
-  .logo {
-    margin: 0 2rem 0 0;
-  }
 
   header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
+    /* display: flex; */
+    /* place-items: flex-start; */
+    /* flex-wrap: wrap; */
   }
 
   nav {
     text-align: left;
-    margin-left: -1rem;
-    font-size: 1rem;
+    margin-left: 10rem;
+    font-size: 1.5rem;
 
-    padding: 1rem 0;
+    /* padding: 1rem 0; */
     margin-top: 1rem;
   }
 }
+.logo {
+    display: block;
+    margin: 2rem auto 2rem;
+      /*margin: 0 2rem 0 0;*/
+    filter: invert(100%) brightness(98%) contrast(102%);
+  }
 
-</style>
-<!-- added style below-->
-
-<style scoped>
 h1 {
   font-weight: 500;
   font-size: 2.6rem;
@@ -114,9 +108,6 @@ h3 {
     text-align: left;
   }
 }
-</style>
-
-<style scoped>
 
 #app {
   max-width: 1280px;
@@ -139,7 +130,7 @@ a,
   }
 }
 
-@media (min-width: 1024px) {
+/* @media (min-width: 1024px) {
   body {
     display: flex;
     place-items: center;
@@ -150,6 +141,6 @@ a,
     grid-template-columns: 1fr 1fr;
     padding: 0 2rem;
   }
-}
+} */
 
 </style>
