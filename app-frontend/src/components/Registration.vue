@@ -9,25 +9,28 @@
             <label for="pass">Password:</label><br>
             <input v-model="passWord" id="pass" type="text" placeholder="Password" required><br><br>
             <button class="submit">Submit</button> <br><br>
+            <p>{{ exceptionText }}</p>
         </form>
     </div>
 </template>
 
 <script lang="ts">
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
+import { ref } from 'vue';
     export default {
         data() {
             return {
                 userName: '',
-                passWord: ''
+                passWord: '',
+                exceptionText: ref('')
             };
         },
         methods: {
             async register() {
-                console.log("Submit was clicked.Registration in progress.");
+                console.log("Submit was clicked. Registration in progress.");
                 const url = location.origin;
                 try {
-                    const response = await axios.put(url+"/api/authentication/register", {
+                    const response = await axios.post(url+"/api/user/create", {
                         username: this.userName,
                         password: this.passWord,
                     },
@@ -45,7 +48,7 @@ import axios from 'axios';
                         if (err.code === 'ECONNABORTED') {
                         console.log('The request timed out.');
                         } else {
-                        console.log(err);
+                        this.exceptionText = `${err} (If error 409, an account with that name already exists!)`;
                         }
                     }
             },

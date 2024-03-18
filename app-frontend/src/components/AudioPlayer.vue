@@ -30,10 +30,14 @@ const playerSecString = ref("");
 const playerMinString = ref("");
 const player = ref(null);
 const emit = defineEmits(['playbackFinished']);
+const props = defineProps<{ currentText: string }>()
+const currentText = computed(() => props.currentText);
+
+
 
 function setup_jscw() {
     jscw_var.setWpm(30);
-    jscw_var.setText("Lorem");// ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Cras fermentum odio eu feugiat pretium. Euismod quis viverra nibh cras pulvinar mattis nunc. At urna condimentum mattis pellentesque id nibh tortor id. Nunc lobortis mattis aliquam faucibus purus. Ut porttitor leo a diam sollicitudin tempor. Cras fermentum odio eu feugiat pretium.");
+    jscw_var.setText(currentText.value);// ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Cras fermentum odio eu feugiat pretium. Euismod quis viverra nibh cras pulvinar mattis nunc. At urna condimentum mattis pellentesque id nibh tortor id. Nunc lobortis mattis aliquam faucibus purus. Ut porttitor leo a diam sollicitudin tempor. Cras fermentum odio eu feugiat pretium.");
     jscw_var.setCallback(updatePlayTime);
     jscw_var.startLoop();
     jscw_var.renderPlayer(player.value, jscw_var);
@@ -96,13 +100,15 @@ function updatePlayTime(max: number, value: number) {
 // jscwlib player render
 onMounted(() => {
     setup_jscw();
+    watch(currentText, (newValue) => {
+        jscw_var.setText(newValue)
+    });
 });
 
 // create a jscw variable and set base values
 let jscw_var = new jscw()
 let seekValue = ref(0);
 let currentTime = ref(0);
-const url = "https://github.com/rafaelreis-hotmart/Audio-Sample-files/raw/master/sample.mp3"
 
 // allow the user to play and pause the player
 function pause() {
