@@ -10,14 +10,19 @@
     <div>
         <form @submit.prevent='selecting'>
             <select v-model='selecting'>
-                <!-- <button class="selectLesson">Select a Lesson</button> <br><br> -->
-                <!-- <option disabled value="">Select a Lesson</option>
-                <option v-for="option in options" :value="option">{{option}}</option> -->
+                <option disabled value="">Select a Lesson</option>
+                <option value="">Select a Lesson</option>
+                <option value="">Select a Lesson</option>
+                <option value="">Select a Lesson</option>
+                <option value="">Select a Lesson</option>
+                <!-- <option v-for="option in options" :value="option">{{option}}</option> -->
             </select>
             <button class='selectionMade' @click='selecting'>Go to This Lesson</button> <br><br>
         </form>
     </div>
     </template>
+
+<!-- https://www.bezkoder.com/vue-node-express-mongodb-mevn-crud/ -->
 
 <script lang="ts">
     import axios from 'axios';
@@ -25,9 +30,9 @@
         data() {
             return {
                 selected: '',
-                options: [
-                    // selecting()
-                ]
+                // options: [
+                //     // selecting()
+                // ]
             };
         },
         methods: {
@@ -42,7 +47,7 @@
             async selecting() {
                 console.log("Popping open a selection");
                 try {
-                    const response = await axios.get(location.origin+"/api/authentication/login", {})
+                    const response = await axios.get(location.origin+"/api/selectLesson/select", {})
 
                 } catch(error) {
                     console.error("Error switching to registration page", error);
@@ -56,5 +61,8 @@
 header {
     height: 70px;
     text-align: center;
+}
+.goToHome {
+    
 }
 </style>

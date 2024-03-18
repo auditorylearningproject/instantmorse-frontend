@@ -53,7 +53,7 @@ const router = createRouter({
       path: '/registration',
       name: 'Registration',
       meta: { layout: 'BlankLayout', pageTitle: "Registration Page" },
-      component: RegistrationView
+      component: RegistrationView,
     },
     {
       path: '/lessonSelect',
@@ -68,6 +68,15 @@ const router = createRouter({
       meta: { layout: 'BlankLayout', pageTitle: "404 Not Found" }
     }
   ]
-})
+});
+
+// https://www.digitalocean.com/community/tutorials/vuejs-advanced-vue-routing
+// router.beforeEach((to, from, next) => {
+//   if (to.name !== 'Authentication') {
+//     next({ name: 'Authentication' });
+//   } else {
+//     next();
+//   }
+// });
 
 export default router
