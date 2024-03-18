@@ -3,6 +3,9 @@
 import { computed, ref, watch } from "vue";
 import { Transcriber, useRecorder, RecorderEventType, type Clip } from "@/components/speech_to_text"
 import AudioPlayer from "@/components/AudioPlayer.vue";
+import { type AttemptDto } from "@/dto/attempt.dto";
+import type { AxiosResponse } from "axios";
+import axios, { HttpStatusCode } from "axios";
 
   const alphabetToPhoneticMap: Map<string, string> = new Map([
       ['A', 'alpha'],
@@ -72,8 +75,9 @@ function isClip(event: any): event is Clip {
   const transcriber = new Transcriber()
   const currentState = ref("Waiting for voice...");
   let currentID = ref(0);
-  let currentLetter = computed(() => {return arrayOfLetters[currentID.value]})
-  const showStatistics = ref(false)
+  let currentLetter = computed(() => {return arrayOfLetters[currentID.value]});
+  const showStatistics = ref(false);
+  const micSensitivity = ref(0.003);
   
   const handleRecordingEvent = async (event: RecorderEventType | [Clip, number]) => {
     if (typeof event === 'string') {
@@ -139,7 +143,29 @@ function isClip(event: any): event is Clip {
                   recorderController.stopRecording();
                   console.log("HALTED!");
                   currentState.value = "No more letters! Congrats."
+                                 
                   showStatistics.value = true;
+                  const attempt: AttemptDto = {
+                    lesson_id: "65e25b8f54a8d98f4d6edcd2", //TODO: fix this placeholder
+                    char_speed: 0, //TODO: fix this placeholder
+                    eff_speed: 0, //TODO: fix this placeholder
+                    accuracy: averageAccuracy.value,
+                    time_spent: totalTimeToAnswer.value, //seconds
+                    date_time: new Date()
+                  }
+                  const baseUrl: string = window.location.origin;
+                  const response: AxiosResponse = await axios.post(
+                    baseUrl + '/api/attempt',
+                    attempt
+                  );
+                  if (response.status == HttpStatusCode.Created){
+                    currentState.value = "Attempt saved to database!";
+                  }else if(response.status == HttpStatusCode.Unauthorized){
+                    currentState.value = "ERROR: You weren't logged in when the lesson started. Not saved.";
+                  }
+                  else{
+                    throw new Error('Bad response.');
+                  }
               }
         }catch(error){
             console.error('Error during transcription:', error);
@@ -164,16 +190,38 @@ function isClip(event: any): event is Clip {
     accuracy: boolean,
     timeToAnswer: number
   }
+  const averageAccuracy = computed(() => {
+      if (lessonStatistics.value.length === 0) return 0;
+
+      const totalCorrect = lessonStatistics.value.reduce((acc, stat) => {
+        return acc + (stat.accuracy ? 1 : 0);
+      }, 0);
+
+      return (totalCorrect / lessonStatistics.value.length) * 100;
+    });
+
+    const totalTimeToAnswer = computed(() => {
+      return lessonStatistics.value.reduce((acc, stat) => {
+        return acc + stat.timeToAnswer;
+      }, 0);
+    });
 
   watch(recorderController.allClips, async (newValue, oldValue) => {
     console.log("new clip added to Pinia local database...") })
 
   function cwStoppedPlaying(){
-    console.log("CW STOPPED PLAYING... BEGIN RECORDING!")
-    recorderController.beginRecording();
+    if(currentLetter.value !== currentLetterAtEndOfPlay){
+      recorderController.beginRecording();
+      currentLetterAtEndOfPlay = currentLetter.value; //preventing user from calling startRecording after pressing play again on same letter
+    }
     // eslint-disable-next-line no-self-assign
     //currentID.value = currentID.value.valueOf(); // trigger the watcher by assigning the value to itself
   }
+  let currentLetterAtEndOfPlay: string | undefined;
+
+  watch(micSensitivity, async (newValue) => {
+    recorderController.micSensitivity = newValue;
+  });
 </script>
 
 <template>
@@ -191,7 +239,8 @@ function isClip(event: any): event is Clip {
       </section> -->
       <p id="currentstate">{{ currentState }}</p>
       <p id="currentletter">{{ currentLetter }}</p>
-      <AudioPlayer @playbackFinished="cwStoppedPlaying"></AudioPlayer>
+      <div>Adjust microphone sensitivity: <input v-model="micSensitivity" type="range" min="0.001" max="0.01" step="0.001" id="mic-sensitivity"></div>
+      <AudioPlayer @playbackFinished="cwStoppedPlaying" :current-text="currentLetter"></AudioPlayer>
       <div v-if="showStatistics">
         <h2>Lesson Statistics:</h2>
         <ul>
@@ -199,6 +248,8 @@ function isClip(event: any): event is Clip {
             You said: {{ stat.code }}, Correct?: {{ stat.accuracy }}, Time to Answer (seconds): {{ stat.timeToAnswer/1000 }}
           </li>
         </ul>
+        <p>Average accuracy: {{ averageAccuracy }}</p>
+        <p>Total time to answer: {{ totalTimeToAnswer/1000 }}</p>
       </div>
   
       <!-- <section v-show="showSoundClips" class="sound-clips" ref="pElementRef">

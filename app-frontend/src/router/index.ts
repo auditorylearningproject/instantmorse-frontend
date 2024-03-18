@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import RecordView from '@/views/RecordView.vue'
 import AudioPlayerVue from '@/views/AudioPlayer.vue'
+import StatisticsVue from '@/views/StatisticsView.vue'
 import AuthenticationView from '@/views/AuthenticationView.vue'
 import RegistrationView from '@/views/RegistrationView.vue'
 import LessonViewVue from '@/views/LessonView.vue'
@@ -60,6 +61,12 @@ const router = createRouter({
       name: 'SelectLesson',
       meta: { layout: 'BlankLayout', pageTitle: "Select Lesson Page" },
       component: LessonSelect
+    },
+    {
+      path: '/statistics',
+      name: 'statistics',
+      meta: { layout: 'BlankLayout', pageTitle: "User Statistics" },
+      component: StatisticsVue
     },
     {
       path: '/:catchAll(.*)',
