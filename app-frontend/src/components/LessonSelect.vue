@@ -8,15 +8,11 @@
             </form>
     </div>
     <div>
+        <select v-model='fetchLesson'>
+            <option disabled value="">Select a Lesson</option>
+            <option v-for="lesson in lessons" :key="lesson.id" value="">{{ lesson.lesson_name }}</option>
+        </select>
         <form @submit.prevent='selecting'>
-            <select v-model='selecting'>
-                <option disabled value="">Select a Lesson</option>
-                <option value="">Select a Lesson</option>
-                <option value="">Select a Lesson</option>
-                <option value="">Select a Lesson</option>
-                <option value="">Select a Lesson</option>
-                <!-- <option v-for="option in options" :value="option">{{option}}</option> -->
-            </select>
             <button class='selectionMade' @click='selecting'>Go to This Lesson</button> <br><br>
         </form>
     </div>
@@ -29,11 +25,17 @@
     export default {
         data() {
             return {
-                selected: '',
-                // options: [
-                //     // selecting()
-                // ]
+                lessons : []
             };
+        },
+        fetchLesson() {
+            console.log("Popping open a selection");
+            try {
+                axios.get(location.origin+"/api/lesson/select")
+                .then(response => this.lessons = response.data);
+            } catch(error) {
+                console.error("Error switching to lesson page", error);
+            }
         },
         methods: {
             async goToHome() {
@@ -45,12 +47,13 @@
                 }
             },
             async selecting() {
-                console.log("Popping open a selection");
                 try {
-                    const response = await axios.get(location.origin+"/api/selectLesson/select", {})
-
+                    // Call the lesson selected and load the page needed
+                    // fetchLesson();
+                    // const response = await axios.get(location.origin+"/api/lesson/select")
+                    this.$router.push('/lesson');
                 } catch(error) {
-                    console.error("Error switching to registration page", error);
+                    console.error("Error switching to lesson page", error);
                 }
             },
         },
@@ -61,8 +64,5 @@
 header {
     height: 70px;
     text-align: center;
-}
-.goToHome {
-    
 }
 </style>
