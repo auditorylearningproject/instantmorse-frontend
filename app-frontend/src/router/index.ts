@@ -33,10 +33,11 @@ const router = createRouter({
       component: RecordView
     },
     {
-      path: '/lesson',
+      path: '/lesson/:lessonID',
       name: 'lesson-page',
       meta: { layout: 'BlankLayout', pageTitle: "Lesson Page"},
-      component: LessonViewVue
+      component: LessonViewVue,
+      props: { default: true }
     },
     {
       path: '/cw-widget',

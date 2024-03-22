@@ -6,6 +6,16 @@ import AudioPlayer from "@/components/AudioPlayer.vue";
 import { type AttemptDto } from "@/dto/attempt.dto";
 import type { AxiosResponse } from "axios";
 import axios, { HttpStatusCode } from "axios";
+import { useRoute, useRouter } from 'vue-router'
+
+const router = useRouter()
+const route = useRoute()
+
+  const props = defineProps<{
+    lessonID: string
+  }>()
+
+
 
   const alphabetToPhoneticMap: Map<string, string> = new Map([
       ['A', 'alpha'],
@@ -71,14 +81,28 @@ function isSpecialTuple(event: any): event is [Clip, number] {
 function isClip(event: any): event is Clip {
   return event && typeof event.audio !== 'undefined';
 }
-  const arrayOfLetters = ['a', 'b', 'c', 'd', 'e', 'f'];
+  const arrayOfLetters = ref([]); //TODO: fill using route.params.lessonID;
   const transcriber = new Transcriber()
   const currentState = ref("Waiting for voice...");
   let currentID = ref(0);
-  let currentLetter = computed(() => {return arrayOfLetters[currentID.value]});
+  let currentLetter = computed(() => {return arrayOfLetters.value[currentID.value]});
   const showStatistics = ref(false);
   const micSensitivity = ref(0.003);
   
+  watch(() => route.params.lessonID, (newId, oldId) => {
+    console.log("LESSON ID CHANGED!");
+  });
+
+  (async () => {
+    const baseUrl: string = window.location.origin;
+    const response: AxiosResponse = await axios.post(
+      baseUrl + '/api/lesson/get',
+      route.params.lessonID
+    );
+    //assume response.data is an array, then set it to
+    arrayOfLetters.value = response.data;
+    })();
+
   const handleRecordingEvent = async (event: RecorderEventType | [Clip, number]) => {
     if (typeof event === 'string') {
         // Handle RecorderEventType
@@ -97,7 +121,7 @@ function isClip(event: any): event is Clip {
                 break;
         }
     } else if (isSpecialTuple(event)) { // this is equivalent to RecordingStopped
-          if(event[0].name?.includes(arrayOfLetters[currentID.value]) ?? false){
+          if(event[0].name?.includes(arrayOfLetters.value[currentID.value]) ?? false){
             currentState.value = "Letter matched to clip! Checking correctness...";
             const newStat: singleCodeStat = {
               code: "",
@@ -133,7 +157,7 @@ function isClip(event: any): event is Clip {
               }
 
 
-              if(currentID.value < arrayOfLetters.length-1){
+              if(currentID.value < arrayOfLetters.value.length-1){
                   currentID.value++;
                   setTimeout(() => {
                       currentState.value = ("Waiting for voice...")
@@ -146,7 +170,7 @@ function isClip(event: any): event is Clip {
                                  
                   showStatistics.value = true;
                   const attempt: AttemptDto = {
-                    lesson_id: "65e25b8f54a8d98f4d6edcd2", //TODO: fix this placeholder
+                    lesson_id: route.params.lessonID as string,//TODO: fix this placeholder
                     char_speed: 0, //TODO: fix this placeholder
                     eff_speed: 0, //TODO: fix this placeholder
                     accuracy: averageAccuracy.value,
