@@ -1,7 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import RecordView from '@/views/RecordView.vue'
-import AudioPlayerVue from '@/views/AudioPlayer.vue'
 import StatisticsVue from '@/views/StatisticsView.vue'
 import AuthenticationView from '@/views/AuthenticationView.vue'
 import RegistrationView from '@/views/RegistrationView.vue'
@@ -38,12 +37,6 @@ const router = createRouter({
       meta: { layout: 'BlankLayout', pageTitle: "Lesson Page"},
       component: LessonViewVue,
       props: { default: true }
-    },
-    {
-      path: '/cw-widget',
-      name: 'playcw',
-      meta: { layout: 'BlankLayout'},
-      component: AudioPlayerVue
     },
     {
       path: '/authentication',
