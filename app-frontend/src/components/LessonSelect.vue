@@ -9,14 +9,14 @@
     </div>
     <div>
         <select v-model="selectedItem" @change="fetchData">
-            <option v-for="lesson in dropdownOptions" :value="lesson">{{ lesson }}</option>
+            <option v-for="lesson in lessons" :key="lesson.lesson_name">{{ lesson.lesson_name + "\n" + lesson.array_o_chars }}</option>
         </select>
-        <ul>
+        <!-- <ul>
             <li v-for="lesson in lessons" :key="lesson._id">
                 {{ lesson.lesson_name }}
                 {{ lesson.array_o_chars }}
             </li>
-        </ul>
+        </ul> -->
         <!-- <select v-model="fetchLesson"> -->
         <!-- <v-select :options="lessons" label="name">
             <template #option="option">
@@ -41,7 +41,7 @@
         data() {
             return {
                 selectedItem: null,
-                dropdownOptions: ['Option 1', 'Option 2', 'Option 3'], // Populate dropdown options
+                // dropdownOptions: ['Option 1', 'Option 2', 'Option 3'], // Populate dropdown options
                 lessons : [] as { _id: number, lesson_name: string, array_o_chars: string, group: object }[]
             };
         },
@@ -65,7 +65,8 @@
                     if (!this.selectedItem) return;
 
                     // Make a request to backend with selected item
-                    await axios.get(`/api/lesson/select?dropdownItem=${this.selectedItem}`)
+                    // await axios.get(`/api/lesson/select?dropdownItem=${this.selectedItem}`)
+                    await axios.get('/api/lesson/select')
                     .then(response => this.lessons = response.data);
                     // axios.get(location.origin+"/api/lesson/select")
                     // .then(response => this.lessons = response.data);
