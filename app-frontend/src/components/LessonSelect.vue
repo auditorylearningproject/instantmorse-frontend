@@ -8,9 +8,7 @@
             </form>
     </div>
     <div>
-        <select v-model="selectedItem" @change="fetchData">
-            <option v-for="lesson in lessons" :key="lesson.lesson_name">{{ lesson.lesson_name + "\n" + lesson.array_o_chars }}</option>
-        </select>
+        <v-select :options="lessons" label="lesson_name" v-model="selectedItem"></v-select>
         <!-- <ul>
             <li v-for="lesson in lessons" :key="lesson._id">
                 {{ lesson.lesson_name }}
@@ -33,63 +31,68 @@
 
 <!-- https://www.bezkoder.com/vue-node-express-mongodb-mevn-crud/ -->
 
-<script lang="ts">
+<script setup lang="ts">
     import axios from 'axios';
-    // import { ref } from 'vue'
+import { onMounted, ref } from 'vue';
+import { useRoute, useRouter } from 'vue-router'
 
-    export default {
-        data() {
-            return {
-                selectedItem: null,
+const router = useRouter()
+    // import { ref } from 'vue'
+interface Lesson {
+  _id: number;
+  lesson_name: string;
+  array_o_chars: string[];
+  group: object;
+}
+
+        let lessons: Lesson[] = [{_id: -1, lesson_name: "Please wait...", array_o_chars: [], group: {} }];
+
+        const selectedItem = ref()
                 // dropdownOptions: ['Option 1', 'Option 2', 'Option 3'], // Populate dropdown options
-                lessons : [] as { _id: number, lesson_name: string, array_o_chars: string, group: object }[]
-            };
-        },
-        mounted() {
-            // Fetch initial data
-            this.fetchData();
-        },
-        methods: {
-            async goToHome() {
+
+        onMounted(() => {
+            fetchData();
+        });
+
+        const goToHome = async () => {
                 console.log("Ladies and Gentlemen, we got him");
                 try {
-                    this.$router.push('/');
+                    router.push('/');
                 } catch(error) {
                     console.error("Error switching to home page", error);
                 }
-            },
-            async fetchData() {
+            };
+            const fetchData = async () => {
                 console.log("Popping open a selection");
                 try {
-                    // Make sure a dropdown item is selected
-                    if (!this.selectedItem) return;
+                    // Make sure a dropdown item is selected --> This doesn't make sense, isn't this the method that populates the items in the first place?
+                //    if (!selectedItem.value) return;
 
                     // Make a request to backend with selected item
                     // await axios.get(`/api/lesson/select?dropdownItem=${this.selectedItem}`)
                     await axios.get('/api/lesson/select')
-                    .then(response => this.lessons = response.data);
+                    .then(response => lessons = response.data);
                     // axios.get(location.origin+"/api/lesson/select")
                     // .then(response => this.lessons = response.data);
                 } catch(error) {
                     console.error("Error switching to lesson page", error);
                 }
-            },
-            async selecting() {
+            };
+            const selecting = async () => {
                 try {
                     // Call the lesson selected and load the page needed
                     // fetchLesson();
                     // const response = await axios.get(location.origin+"/api/lesson/select")
-                    this.$router.push('/lesson');
+                    router.push('/lesson');
                 } catch(error) {
                     console.error("Error switching to lesson page", error);
                 }
-            },
-        },
-    };
+            };
+    import 'vue-select/dist/vue-select.css'
+    
 </script>
 
 <style scoped>
-    @import "../../node_modules/vue-select/dist/vue-select.css";
 
 header {
     height: 70px;
