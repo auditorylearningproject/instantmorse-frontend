@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import RecordView from '@/views/RecordView.vue'
 import StatisticsVue from '@/views/StatisticsView.vue'
+import SettingsView from '@/views/CWSettings.vue'
 import AuthenticationView from '@/views/AuthenticationView.vue'
 import RegistrationView from '@/views/RegistrationView.vue'
 import LessonViewVue from '@/views/LessonView.vue'
@@ -36,7 +37,7 @@ const router = createRouter({
       name: 'lesson-page',
       meta: { layout: 'BlankLayout', pageTitle: "Lesson Page"},
       component: LessonViewVue,
-      props: { default: true }
+      props: true,
     },
     {
       path: '/authentication',
@@ -61,6 +62,12 @@ const router = createRouter({
       name: 'statistics',
       meta: { layout: 'BlankLayout', pageTitle: "User Statistics" },
       component: StatisticsVue
+    },
+    {
+      path: '/settings',
+      name: 'cwsettings',
+      meta: { layout: 'BlankLayout', pageTitle: "CW Settings"},
+      component: SettingsView
     },
     {
       path: '/:catchAll(.*)',

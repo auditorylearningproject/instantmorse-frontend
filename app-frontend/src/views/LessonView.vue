@@ -1,6 +1,6 @@
 <script setup lang="ts">
   
-import { computed, ref, watch } from "vue";
+import { computed, ref, watch, type Ref, onBeforeMount } from "vue";
 import { Transcriber, useRecorder, RecorderEventType, type Clip } from "@/components/speech_to_text"
 import AudioPlayer from "@/components/AudioPlayer.vue";
 import { type AttemptDto } from "@/dto/attempt.dto";
@@ -14,7 +14,6 @@ const route = useRoute()
   const props = defineProps<{
     lessonID: string
   }>()
-
 
 
   const alphabetToPhoneticMap: Map<string, string> = new Map([
@@ -81,27 +80,20 @@ function isSpecialTuple(event: any): event is [Clip, number] {
 function isClip(event: any): event is Clip {
   return event && typeof event.audio !== 'undefined';
 }
-  const arrayOfLetters = ref([]); //TODO: fill using route.params.lessonID;
+  const arrayOfLetters: Ref<string[]> = ref([]); //TODO: fill using route.params.lessonID;
   const transcriber = new Transcriber()
   const currentState = ref("Waiting for voice...");
   let currentID = ref(0);
   let currentLetter = computed(() => {return arrayOfLetters.value[currentID.value]});
   const showStatistics = ref(false);
   const micSensitivity = ref(0.003);
+  let loading = ref(true)
   
-  watch(() => route.params.lessonID, (newId, oldId) => {
+  watch(() => props.lessonID, (newId, oldId) => {
     console.log("LESSON ID CHANGED!");
   });
 
-  (async () => {
-    const baseUrl: string = window.location.origin;
-    const response: AxiosResponse = await axios.post(
-      baseUrl + '/api/lesson/get',
-      route.params.lessonID
-    );
-    //assume response.data is an array, then set it to
-    arrayOfLetters.value = response.data;
-    })();
+
 
   const handleRecordingEvent = async (event: RecorderEventType | [Clip, number]) => {
     if (typeof event === 'string') {
@@ -159,6 +151,7 @@ function isClip(event: any): event is Clip {
 
               if(currentID.value < arrayOfLetters.value.length-1){
                   currentID.value++;
+
                   setTimeout(() => {
                       currentState.value = ("Waiting for voice...")
                       }, 1000);
@@ -170,7 +163,7 @@ function isClip(event: any): event is Clip {
                                  
                   showStatistics.value = true;
                   const attempt: AttemptDto = {
-                    lesson_id: route.params.lessonID as string,//TODO: fix this placeholder
+                    lesson_id: props.lessonID as string,//TODO: fix this placeholder
                     char_speed: 0, //TODO: fix this placeholder
                     eff_speed: 0, //TODO: fix this placeholder
                     accuracy: averageAccuracy.value,
@@ -188,12 +181,13 @@ function isClip(event: any): event is Clip {
                     currentState.value = "ERROR: You weren't logged in when the lesson started. Not saved.";
                   }
                   else{
-                    throw new Error('Bad response.');
+                    throw new Error('Error in transcription request... app is shutting down.');
                   }
               }
         }catch(error){
+            let newError = error as Error;
             console.error('Error during transcription:', error);
-            currentState.value = ("Error in transcription Request... app is shutting down.");
+          //  currentState.value = (newError.message);
             recorderController.stopSilenceDetection();
             recorderController.stopRecording();
         }finally{
@@ -204,10 +198,39 @@ function isClip(event: any): event is Clip {
     }
     }  };
   
-  let recorderController = useRecorder(currentLetter, handleRecordingEvent);;
+    let recorderController = useRecorder(currentLetter, handleRecordingEvent);
 
+    onBeforeMount(async () => {
+    const baseUrl: string = window.location.origin;
+    
+    try{
+      if(!props.lessonID){
+        currentState.value = "ERROR: No lesson specified.";
+        throw new Error("Lesson parameter not specified.");
+      }
 
-  //todo: extract char_speed and effective_speed_wpm values from the player at the end of the session.
+      await axios.post( //const response: AxiosResponse = 
+          baseUrl + '/api/lesson/get',
+          props.lessonID
+        ).then(response => {
+          arrayOfLetters.value = response.data;
+      }).catch((error) => {
+          arrayOfLetters.value = [];
+          currentState.value = "ERROR: The lesson you have requested is not found. Please go back."; //TODO: Fix why this refuses to show up!
+      // if(response.status === HttpStatusCode.NotFound){
+          //throw new Error("Lesson not found in DB!");
+          return Promise.reject(error)
+        });
+        loading.value = false;
+  }catch(error){
+      recorderController?.stopRecording();
+      recorderController?.stopSilenceDetection();
+    console.log(error)
+  }   
+ 
+    });
+
+  //TODO: extract char_speed and effective_speed_wpm values from the player at the end of the session.
   const lessonStatistics = ref<Array<singleCodeStat>>([])
   interface singleCodeStat {
     code: string,
@@ -264,7 +287,11 @@ function isClip(event: any): event is Clip {
       <p id="currentstate">{{ currentState }}</p>
       <p id="currentletter">{{ currentLetter }}</p>
       <div>Adjust microphone sensitivity: <input v-model="micSensitivity" type="range" min="0.001" max="0.01" step="0.001" id="mic-sensitivity"></div>
-      <AudioPlayer @playbackFinished="cwStoppedPlaying" :current-text="currentLetter"></AudioPlayer>
+      <div v-if="loading">Loading lesson text...</div>
+      <div v-else>
+        <AudioPlayer @playbackFinished="cwStoppedPlaying" :current-text="currentLetter"></AudioPlayer>
+      </div>
+
       <div v-if="showStatistics">
         <h2>Lesson Statistics:</h2>
         <ul>
