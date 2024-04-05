@@ -7,6 +7,7 @@ import { type AttemptDto } from "@/dto/attempt.dto";
 import type { AxiosResponse } from "axios";
 import axios, { HttpStatusCode } from "axios";
 import { useRoute, useRouter } from 'vue-router'
+import type { LessonDto } from "@/dto/lesson.dto";
 
 const router = useRouter()
 const route = useRoute()
@@ -80,14 +81,14 @@ function isSpecialTuple(event: any): event is [Clip, number] {
 function isClip(event: any): event is Clip {
   return event && typeof event.audio !== 'undefined';
 }
-  const arrayOfLetters: Ref<string[]> = ref([]); //TODO: fill using route.params.lessonID;
+  const arrayOfLetters: Ref<string[]> = ref([]);
   const transcriber = new Transcriber()
-  const currentState = ref("Waiting for voice...");
+  const currentState = ref("Loading lesson...");
   let currentID = ref(0);
   let currentLetter = computed(() => {return arrayOfLetters.value[currentID.value]});
   const showStatistics = ref(false);
-  const micSensitivity = ref(0.003);
-  let loading = ref(true)
+  const micSensitivity = ref(0.003);  
+  const lesson = ref<LessonDto | null>(null);
   
   watch(() => props.lessonID, (newId, oldId) => {
     console.log("LESSON ID CHANGED!");
@@ -211,17 +212,19 @@ function isClip(event: any): event is Clip {
 
       await axios.post( //const response: AxiosResponse = 
           baseUrl + '/api/lesson/get',
-          props.lessonID
+          {lessonID: props.lessonID},
+          // {headers: { "Content-Type": "text/plain" }}
         ).then(response => {
-          arrayOfLetters.value = response.data;
+          lesson.value = response.data
+          arrayOfLetters.value = lesson.value!.array_o_chars;
       }).catch((error) => {
           arrayOfLetters.value = [];
-          currentState.value = "ERROR: The lesson you have requested is not found. Please go back."; //TODO: Fix why this refuses to show up!
+          currentState.value = "ERROR: The lesson you have requested is not found. Please go back.";
       // if(response.status === HttpStatusCode.NotFound){
           //throw new Error("Lesson not found in DB!");
           return Promise.reject(error)
         });
-        loading.value = false;
+        currentState.value = "Waiting for voice..."
   }catch(error){
       recorderController?.stopRecording();
       recorderController?.stopSilenceDetection();
@@ -275,6 +278,7 @@ function isClip(event: any): event is Clip {
     <!-- <div class="wrapper"> -->
       <header>
         <h1>Lesson Page</h1>
+        <h2>Name: {{ lesson?.lesson_name }}, Group: {{ lesson?.group.name ?? "Unknown" }}</h2>
       </header>
       <main>
       <!-- <section class="main-controls"> -->
@@ -287,7 +291,7 @@ function isClip(event: any): event is Clip {
       <p id="currentstate">{{ currentState }}</p>
       <p id="currentletter">{{ currentLetter }}</p>
       <div>Adjust microphone sensitivity: <input v-model="micSensitivity" type="range" min="0.001" max="0.01" step="0.001" id="mic-sensitivity"></div>
-      <div v-if="loading">Loading lesson text...</div>
+      <div v-if="!currentLetter">Loading lesson text...</div>
       <div v-else>
         <AudioPlayer @playbackFinished="cwStoppedPlaying" :current-text="currentLetter"></AudioPlayer>
       </div>
