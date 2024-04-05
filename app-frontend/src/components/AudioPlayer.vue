@@ -11,8 +11,11 @@
         <button @click="pause">Play/Pause</button>
         <button @click="stop">Stop</button>
         <button @click="download">Download MP3</button>
+        <button @click="settings">Settings</button>
     </div>
     <div ref="player"></div>
+
+    <p>{{ currentWPM }}</p>
 </template>
 
 <script lang = "ts" setup>
@@ -20,6 +23,9 @@ import { onMounted, ref, watch, type Ref, computed, type ComputedRef } from "vue
 import { jscw } from "./jscwlib.js"
 import { setTextRange } from "typescript";
 import { timeStamp } from "console";
+import Slider from '@vueform/slider'
+import { useSettingsStore } from "@/stores/settings";
+// const wordsPerMinute = ref(30);
 const playerMax = ref(0);
 const playerMaxSec = ref(0);
 const playerMaxSecOnes = ref(0);
@@ -30,17 +36,16 @@ const playerSecString = ref("");
 const playerMinString = ref("");
 const player = ref(null);
 const emit = defineEmits(['playbackFinished']);
-const props = defineProps<{ currentText: string }>()
+const props = defineProps<{ currentText: string}>()
 const currentText = computed(() => props.currentText);
-
-
+const settingsStore = useSettingsStore();
+const currentWPM = settingsStore.getWPM;
 
 function setup_jscw() {
-    jscw_var.setWpm(30);
-    jscw_var.setText(currentText.value);// ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Cras fermentum odio eu feugiat pretium. Euismod quis viverra nibh cras pulvinar mattis nunc. At urna condimentum mattis pellentesque id nibh tortor id. Nunc lobortis mattis aliquam faucibus purus. Ut porttitor leo a diam sollicitudin tempor. Cras fermentum odio eu feugiat pretium.");
+    jscw_var.setWpm(settingsStore.getWPM);
+    jscw_var.setText(currentText.value);
     jscw_var.setCallback(updatePlayTime);
     jscw_var.startLoop();
-    jscw_var.renderPlayer(player.value, jscw_var);
 }
 
 function updatePlayTime(max: number, value: number) {
@@ -51,7 +56,6 @@ function updatePlayTime(max: number, value: number) {
     playerMaxMinute.value = Math.floor(playerMax.value / 60);
     playerValue.value = value;
     const intPlayerValue = Math.ceil(value);
-    //playerValue.value = Math.ceil(value);
     if (intPlayerValue >= 0) {
         switch (intPlayerValue % 60){
             case 0: 
@@ -128,5 +132,9 @@ function stop() {
 // allow the user to download the MP3 file from the player
 function download() {
     
+}
+
+function settings() {
+    settingsPane: true
 }
 </script>
