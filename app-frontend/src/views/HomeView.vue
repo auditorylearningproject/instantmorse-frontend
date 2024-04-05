@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, type ComputedRef } from 'vue';
-import TheWelcome from '../components/TheWelcome.vue'
+import TheWelcome from '../components/TheWelcome.vue';
+import NavigationHeader from '../components/NavigationHeader.vue';
 import type { AxiosResponse } from 'axios';
 import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from "../components/HelloWorld.vue"
 import axios from 'axios';
 const notLoggedInMessage = "You are currently not logged in.";
 const currentStatus = ref("");
@@ -45,26 +45,13 @@ if(response && response.data['username']){
 </script>
 
 <template>
-    <header>
-    <img alt="InstantMorse logo" class="logo" src="@/assets/morse-code.png" width="125" height="125" />
-
-    <div class="wrapper">
-      <HelloWorld msg="InstantMorse.Codes - Learn Morse Code By Speaking!" />
-
-      <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/authentication" v-if="!loggedIn">Login</RouterLink>
-        <RouterLink to="/registration" v-if="!loggedIn">Register</RouterLink>
-        <RouterLink to="/lessonSelect">Select Lesson</RouterLink>
-        <RouterLink to="/statistics">User Statistics</RouterLink>
-        <RouterLink to="/settings">Settings</RouterLink>
-
-      </nav>
-    </div>
-  </header>
+  <NavigationHeader/>
 
   <!--<RouterView /> -->
   <main>
+    <img alt="InstantMorse logo" class="logo" src="@/assets/morse-code.png" width="125" height="125" />
+   
+   <div class="greetings"> <h1 class="green"> InstantMorse.Codes - Learn Morse Code by Speaking!</h1> </div>
     <TheWelcome />
     <p style="text-align: center; margin: auto; font-size: 2rem;"> {{ currentStatus }}</p>
   </main>
@@ -78,30 +65,30 @@ header {
 }
 
 
-nav {
+/* nav {
   width: 100%;
   font-size: 12px;
   text-align: center;
   margin-top: 2rem;
-}
+} */
 
 nav a.router-link-exact-active {
   color: var(--color-text);
 }
 
-nav a.router-link-exact-active:hover {
+/* nav a.router-link-exact-active:hover {
   background-color: transparent;
-}
+} */
 
-nav a {
+/* nav a {
   display: inline-block;
   padding: 0 1rem;
   border-left: 1px solid var(--color-border);
-}
+} */
 
-nav a:first-of-type {
+/* nav a:first-of-type {
   border: 0;
-}
+} */
 
 @media (min-width: 1024px) {
   header {
@@ -117,14 +104,14 @@ nav a:first-of-type {
     /* flex-wrap: wrap; */
   }
 
-  nav {
+  /* nav {
     text-align: left;
     margin-left: 10rem;
     font-size: 1.5rem;
 
-    /* padding: 1rem 0; */
+    /* padding: 1rem 0;//
     margin-top: 1rem;
-  }
+  } */
 }
 .logo {
     display: block;
@@ -147,14 +134,16 @@ h3 {
 .greetings h1,
 .greetings h3 {
   text-align: center;
+  margin: auto;
 }
 
-@media (min-width: 1024px) {
+/* @media (min-width: 1024px) {
   .greetings h1,
   .greetings h3 {
     text-align: left;
+    margin: auto;
   }
-}
+} */
 
 #app {
   max-width: 1280px;
