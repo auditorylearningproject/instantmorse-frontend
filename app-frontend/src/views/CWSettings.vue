@@ -1,58 +1,102 @@
-<script setup>
-import { ref } from 'vue'
 
-const text = ref('Edit me')
-const checked = ref(true)
-const checkedNames = ref(['Jack'])
-const picked = ref('One')
-const selected = ref('A')
-const multiSelected = ref(['A'])
-</script>
 
 <template>
-  <h2>Text Input</h2>
-  <input v-model="text"> {{ text }}
 
-  <h2>Checkbox</h2>
+  <h2>Random Checkbox</h2>
   <input type="checkbox" id="checkbox" v-model="checked">
   <label for="checkbox">Checked: {{ checked }}</label>
 
-  <!--
-    multiple checkboxes can bind to the same
-    array v-model value
-  -->
-  <h2>Multi Checkbox</h2>
-  <input type="checkbox" id="jack" value="Jack" v-model="checkedNames">
-  <label for="jack">Jack</label>
-  <input type="checkbox" id="john" value="John" v-model="checkedNames">
-  <label for="john">John</label>
-  <input type="checkbox" id="mike" value="Mike" v-model="checkedNames">
-  <label for="mike">Mike</label>
-  <p>Checked names: <pre>{{ checkedNames }}</pre></p>
 
-  <h2>Radio</h2>
-  <input type="radio" id="one" value="One" v-model="picked">
-  <label for="one">One</label>
-  <br>
-  <input type="radio" id="two" value="Two" v-model="picked">
-  <label for="two">Two</label>
-  <br>
-  <span>Picked: {{ picked }}</span>
-
-  <h2>Select</h2>
-  <select v-model="selected">
-    <option disabled value="">Please select one</option>
-    <option>A</option>
-    <option>B</option>
-    <option>C</option>
+  <h2>Choose the languages you want to use:</h2>
+  <select v-model="languages" multiple style="width:100px">
+    <option>English</option>
   </select>
-  <span>Selected: {{ selected }}</span>
+  <span>Selected: {{ languages }}</span>
 
-  <h2>Multi Select</h2>
-  <select v-model="multiSelected" multiple style="width:100px">
-    <option>A</option>
-    <option>B</option>
-    <option>C</option>
-  </select>
-  <span>Selected: {{ multiSelected }}</span>
+
+  <div class="cw-settings">
+    <h2>CW Settings</h2>
+    <div v-if="isLoading">
+      Loading settings...
+    </div>
+    <div v-else-if="isError">
+      <p>Error: {{ isError }}</p>
+    </div>
+    <div v-else>
+      <form @submit.prevent="saveSettings">
+        <div class="setting">
+          <label for="charSpeed">Character Speed (wpm):</label>
+          <input v-model.number="settings.char_speed" type="number" id="charSpeed" min="1" max="100">
+        </div>
+        <div class="setting">
+          <label for="effectiveSpeed">Effective Speed (wpm):</label>
+          <input v-model.number="settings.effective_speed_wpm" type="number" id="effectiveSpeed" min="1" max="100">
+        </div>
+        <div class="setting">
+          <label for="tone">Tone (Hz):</label>
+          <input v-model.number="settings.playback_tone_hz" type="number" id="tone" min="400" max="1000">
+        </div>
+        <div class="setting">
+          <label for="sessionLength">Session Length (number of code groups):</label>
+          <input v-model.number="settings.session_length" type="number" id="sessionLength" min="1">
+        </div>
+        <button type="submit" :disabled="isLoading">Save Settings</button>
+      </form>
+    </div>
+  </div>
 </template>
+
+<script setup lang="ts">
+
+import type { CWSettings } from "src/dto/cwsettings.dto";
+import { ref, reactive, type Ref } from 'vue';
+import axios from 'axios';
+
+const checked = ref(true);
+const languages = ref(['English']);
+const baseUrl: string = window.location.origin;
+
+
+  let settings = ref<CWSettings>({
+    user_id: '0', // Set to 0 for testing
+    char_speed: 0,
+    effective_speed_wpm: 0,
+    playback_tone_hz: 0,
+    session_length: 0,
+  });
+
+    const isLoading = ref(false);
+    const isError: Ref<string | null> = ref(null);
+
+    
+    async function fetchSettings(){
+      isLoading.value = true;
+      isError.value = null;
+      try {
+        const response = await axios.get('/api/settings');//, { params: { userID: settings.user_id } }); (not needed b/c already in the cookie)
+        settings.value = response.data
+        console.log(settings.value)
+      } catch (error) {
+        isError.value = (error as Error).message;
+      } finally {
+        isLoading.value = false;
+      }
+    };
+
+    async function saveSettings(){
+      isLoading.value = true;
+      isError.value = null;
+      try {
+        await axios.put('/api/settings', settings.value);
+        // Show success message (optional)
+      } catch (error) {
+        isError.value = (error as Error).message;
+      } finally {
+        isLoading.value = false;
+      }
+    };
+
+    fetchSettings();
+
+
+</script>
