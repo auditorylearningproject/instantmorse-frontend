@@ -7,7 +7,8 @@ import { type AttemptDto } from "@/dto/attempt.dto";
 import type { AxiosResponse } from "axios";
 import axios, { HttpStatusCode } from "axios";
 import { useRoute, useRouter } from 'vue-router'
-import type { LessonDto } from "@/dto/lesson.dto";
+import { LessonDto } from "@/dto/lesson.dto";
+import { shuffle } from 'lodash-es'
 
 const router = useRouter()
 const route = useRoute()
@@ -78,6 +79,7 @@ function isSpecialTuple(event: any): event is [Clip, number] {
   return Array.isArray(event) && event.length === 2 && isClip(event[0]);
 }
 
+
 function isClip(event: any): event is Clip {
   return event && typeof event.audio !== 'undefined';
 }
@@ -94,7 +96,53 @@ function isClip(event: any): event is Clip {
     console.log("LESSON ID CHANGED!");
   });
 
+  watch(lesson, (newLesson, oldLesson) => {
+  if (newLesson instanceof LessonDto) {
+    const numGroups = 20;
+      //TODO: get defaults from DB API /api/settings
 
+    if(hasSentences(newLesson)){
+      let shuffleSentences: string[] = shuffle(newLesson.array_o_chars);
+      shuffleSentences = extractWords(shuffleSentences, numGroups);
+      arrayOfLetters.value = shuffleSentences
+    }else{
+      const shuffleSentences = newLesson.array_o_chars.slice(0, numGroups);
+      arrayOfLetters.value = shuffleSentences;
+    }
+    //arrayOfLetters.value = lesson.value!.array_o_chars;
+
+  }
+  console.error(arrayOfLetters.value);
+});
+
+function extractWords(sentences: string[], numWords: number): string[] {
+    const result: string[] = [];
+    let wordCount = 0;
+
+    for (const sentence of sentences) {
+        const words = sentence.split(/\s+/); // Split sentence into words
+        for (const word of words) {
+            //const matches = word.match(/\b\w+\b/g); // Match words with punctuation
+           // if (matches) {
+            //    for (const match of matches) {
+                    result.push(word); // Push individual words into result array
+                    wordCount++;
+                    if (wordCount >= numWords) return result; // Return when word count reaches numWords
+            //    }
+           // }
+        }
+    }
+
+    return result;
+}
+
+function hasSentences(obj: LessonDto): boolean {
+  if (obj.extras && obj.extras.sentences) {
+    return true;
+  } else {
+    return false;
+  }
+}
 
   const handleRecordingEvent = async (event: RecorderEventType | [Clip, number]) => {
     if (typeof event === 'string') {
@@ -215,8 +263,11 @@ function isClip(event: any): event is Clip {
           {lessonID: props.lessonID},
           // {headers: { "Content-Type": "text/plain" }}
         ).then(response => {
-          lesson.value = response.data
-          arrayOfLetters.value = lesson.value!.array_o_chars;
+          const lessonDto = new LessonDto("", "", [""], {name: "", order: -1});
+          Object.assign(lessonDto, response.data);
+          lesson.value = lessonDto;
+         // lesson.value = new LessonDto({...response.data});
+         // const lessonDto = new LessonDto({...lessonDto} as Required<typeof lessonDto>);
       }).catch((error) => {
           arrayOfLetters.value = [];
           currentState.value = "ERROR: The lesson you have requested is not found. Please go back.";
