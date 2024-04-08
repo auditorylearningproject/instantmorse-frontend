@@ -1,37 +1,10 @@
-// import { defineStore} from 'pinia';
-// import { ref, type Ref } from 'vue';
-// import Slider from '@vueform/slider';
-
-
-// export const useSettingsStore = defineStore('settings', {
-//     state: () => ({
-//         wpm: 30,
-//         eff: 0
-//     }),
-//     getters: {
-//         getWPM(): number{
-//             return this.wpm;
-//         },
-//         getEFF(): number {
-//             return this.eff;
-//         }
-//     },
-//     // actions: {
-//     //     setWPM(this: ReturnType<typeof useSettingsStore>, newWPM: number) {
-//     //         this.wpm = newWPM;
-//     //     }
-//     // }
-
-//     // NEXT: LOOK INTO WATCHERS IN PINIA TO TRY AND HAVE JSCWLIB AUTOMATICALLY UPDATE ITS SETTINGS WHEN SETTINGS IS UPDATED
-// } )
-
 import { defineStore } from 'pinia';
 import type { ref, Ref } from 'vue';
 
 export interface UserSettings {
-    wpm?: number;
-    eff?: number;
-    freq?: number;
+    wpm?: number; //words per minute
+    eff?: number; //effective speed
+    freq?: number; //frequency (Tone)
 }
 
 export const useSettingsStore = defineStore({
