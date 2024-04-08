@@ -643,7 +643,6 @@ export class jscw {
 
         this.control_labels = {};
         this.control_inputs = {};
-        
 
         //pinia userSettings store controlled variables
         this.wpm = 20;
@@ -942,7 +941,8 @@ export class jscw {
                 this.gainNodePlay.gain.setValueAtTime(v, this.audioCtx.currentTime);
             }
         };
-
+        
+        let userSettings = useSettingsStore();
         watch (
             userSettings.state,
             (state) => {
