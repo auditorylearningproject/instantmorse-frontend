@@ -330,7 +330,7 @@ class RecorderController{
     callback(error, newArrayBuffer as AudioBuffer);
   }
 
-  noiseDetected = false;
+  noiseDetected = ref(false);
 
   async detectSilence() {
     
@@ -380,21 +380,21 @@ class RecorderController{
 
       //const averageVolume = dataArray.reduce((acc, value) => acc + value, 0) / bufferLength;
       console.log("frequency: ", vol, " buffer slice size: ", bufferLength);
-      console.log("noise detect: ", this.noiseDetected)
+      console.log("noise detect: ", this.noiseDetected.value)
       //sourceNode.disconnect()
 
       if (vol < this.silenceThreshold) {
         // Silence detected, start or reset the timeout
-        if (this.silenceTimeout === null && this.noiseDetected) {
+        if (this.silenceTimeout === null && this.noiseDetected.value) {
           this.silenceTimeout = window.setTimeout(() => 
             {
               this.stopRecording(); 
-              this.noiseDetected = false;
+              this.noiseDetected.value = false;
               console.log("No noise for one second, recording stopped!")
             }, 1000); // 1000ms = 1 second
         }
       } else {
-        this.noiseDetected = true
+        this.noiseDetected.value = true
         if(!this.firstNoiseTimestamp){
           this.firstNoiseTimestamp = performance.now();
         }
