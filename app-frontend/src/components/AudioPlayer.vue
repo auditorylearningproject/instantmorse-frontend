@@ -23,7 +23,6 @@ import { onMounted, ref, watch, type Ref, computed, type ComputedRef } from "vue
 import { jscw } from "./jscwlib.js"
 import { setTextRange } from "typescript";
 import { timeStamp } from "console";
-import Slider from '@vueform/slider'
 import { useSettingsStore } from "@/stores/settings";
 // const wordsPerMinute = ref(30);
 const playerMax = ref(0);
