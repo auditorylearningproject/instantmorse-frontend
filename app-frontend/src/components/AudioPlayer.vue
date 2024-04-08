@@ -12,8 +12,6 @@
         <button @click="stop">Stop</button>
     </div>
     <div ref="player"></div>
-
-    <p>{{ currentWPM }}</p>
 </template>
 
 <script lang = "ts" setup>
@@ -37,6 +35,7 @@ const props = defineProps<{ currentText: string}>()
 const currentText = computed(() => props.currentText);
 const settingsStore = useSettingsStore();
 const currentWPM = settingsStore.getWPM;
+console.log(currentWPM)
 
 function setup_jscw() {
     jscw_var.setWpm(settingsStore.getWPM);
