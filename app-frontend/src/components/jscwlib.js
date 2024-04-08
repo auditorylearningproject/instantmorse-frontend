@@ -7,6 +7,7 @@
  *  The MIT license applies.
  */
 import { ref, watch } from 'vue'
+import { useSettingsStore } from "@/stores/settings"
 
 export class jscw {
     constructor(params) {

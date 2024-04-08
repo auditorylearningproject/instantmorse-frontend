@@ -10,8 +10,6 @@
     <div>
         <button @click="pause">Play/Pause</button>
         <button @click="stop">Stop</button>
-        <button @click="download">Download MP3</button>
-        <button @click="settings">Settings</button>
     </div>
     <div ref="player"></div>
 
