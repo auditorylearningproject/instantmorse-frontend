@@ -3,13 +3,13 @@
         <header>
             <h1>Authentication Page</h1>
         </header>
-            <form @submit.prevent="submitForm">
-                <label for="user">Username:</label><br>
-                <input v-model="userName"  id="user" type="text" placeholder="Username" required><br>
-                <label for="pass">Password:</label><br>
-                <input v-model="passWord" id="pass" type="text" placeholder="Password" required><br><br>
-                <button class="submit">Submit</button> <br><br>
-            </form>
+        <form @submit.prevent="submitForm">
+            <label for="user">Username:</label><br>
+            <input v-model="userName"  id="user" type="text" placeholder="Username" required><br>
+            <label for="pass">Password:</label><br>
+            <input v-model="passWord" id="pass" type="text" placeholder="Password" required><br><br>
+            <button class="submit">Submit</button> <br><br>
+        </form>
     </div>
     <div class="toRegistration">
         <form @submit.prevent="linkToRegister">

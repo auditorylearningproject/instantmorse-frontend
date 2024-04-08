@@ -1,11 +1,23 @@
 <script setup lang="ts">
-  
-import { computed, ref, watch } from "vue";
+import NavigationHeader from '../components/NavigationHeader.vue';
+import { computed, ref, watch, type Ref, onBeforeMount } from "vue";
 import { Transcriber, useRecorder, RecorderEventType, type Clip } from "@/components/speech_to_text"
 import AudioPlayer from "@/components/AudioPlayer.vue";
 import { type AttemptDto } from "@/dto/attempt.dto";
 import type { AxiosResponse } from "axios";
-import axios, { HttpStatusCode } from "axios";
+import axios, { AxiosError, HttpStatusCode } from "axios";
+import { useRoute, useRouter } from 'vue-router'
+import { LessonDto } from "@/dto/lesson.dto";
+import { shuffle } from 'lodash-es'
+import type { CWSettings } from '@/dto/cwsettings.dto';
+
+const router = useRouter()
+const route = useRoute()
+
+  const props = defineProps<{
+    lessonID: string
+  }>()
+
 
   const alphabetToPhoneticMap: Map<string, string> = new Map([
       ['A', 'alpha'],
@@ -68,17 +80,77 @@ function isSpecialTuple(event: any): event is [Clip, number] {
   return Array.isArray(event) && event.length === 2 && isClip(event[0]);
 }
 
+
 function isClip(event: any): event is Clip {
   return event && typeof event.audio !== 'undefined';
 }
-  const arrayOfLetters = ['a', 'b', 'c', 'd', 'e', 'f'];
+  const arrayOfLetters: Ref<string[]> = ref([]);
   const transcriber = new Transcriber()
-  const currentState = ref("Waiting for voice...");
+  const currentState = ref("Loading lesson...");
   let currentID = ref(0);
-  let currentLetter = computed(() => {return arrayOfLetters[currentID.value]});
+  let currentLetter = computed(() => {return arrayOfLetters.value[currentID.value]});
   const showStatistics = ref(false);
-  const micSensitivity = ref(0.003);
+  const micSensitivity = ref(0.003);  
+  const lesson = ref<LessonDto | null>(null);
+  const hasSettings = ref(false);
+
   
+  watch(() => props.lessonID, (newId, oldId) => {
+    console.log("LESSON ID CHANGED!");
+  });
+
+  watch(lesson, async (newLesson, oldLesson) => {
+  if (newLesson instanceof LessonDto) {
+    const numGroups = 20;
+
+    const settingsDidLoad = await hasSettings;
+    if(!settingsDidLoad){
+      console.error("Settings for the user didn't load, aborting lesson load.");
+      return
+    }
+    if(hasSentences(newLesson)){
+      let shuffleSentences: string[] = shuffle(newLesson.array_o_chars);
+      shuffleSentences = extractWords(shuffleSentences, numGroups);
+      arrayOfLetters.value = shuffleSentences
+    }else{
+      const shuffleSentences = newLesson.array_o_chars.slice(0, numGroups);
+      arrayOfLetters.value = shuffleSentences;
+    }
+    //arrayOfLetters.value = lesson.value!.array_o_chars;
+
+  }
+  console.error(arrayOfLetters.value);
+});
+
+function extractWords(sentences: string[], numWords: number): string[] {
+    const result: string[] = [];
+    let wordCount = 0;
+
+    for (const sentence of sentences) {
+        const words = sentence.split(/\s+/); // Split sentence into words
+        for (const word of words) {
+            //const matches = word.match(/\b\w+\b/g); // Match words with punctuation
+           // if (matches) {
+            //    for (const match of matches) {
+                    result.push(word); // Push individual words into result array
+                    wordCount++;
+                    if (wordCount >= numWords) return result; // Return when word count reaches numWords
+            //    }
+           // }
+        }
+    }
+
+    return result;
+}
+
+function hasSentences(obj: LessonDto): boolean {
+  if (obj.extras && obj.extras.sentences) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
   const handleRecordingEvent = async (event: RecorderEventType | [Clip, number]) => {
     if (typeof event === 'string') {
         // Handle RecorderEventType
@@ -97,7 +169,7 @@ function isClip(event: any): event is Clip {
                 break;
         }
     } else if (isSpecialTuple(event)) { // this is equivalent to RecordingStopped
-          if(event[0].name?.includes(arrayOfLetters[currentID.value]) ?? false){
+          if(event[0].name?.includes(arrayOfLetters.value[currentID.value]) ?? false){
             currentState.value = "Letter matched to clip! Checking correctness...";
             const newStat: singleCodeStat = {
               code: "",
@@ -133,8 +205,9 @@ function isClip(event: any): event is Clip {
               }
 
 
-              if(currentID.value < arrayOfLetters.length-1){
+              if(currentID.value < arrayOfLetters.value.length-1){
                   currentID.value++;
+
                   setTimeout(() => {
                       currentState.value = ("Waiting for voice...")
                       }, 1000);
@@ -146,7 +219,7 @@ function isClip(event: any): event is Clip {
                                  
                   showStatistics.value = true;
                   const attempt: AttemptDto = {
-                    lesson_id: "65e25b8f54a8d98f4d6edcd2", //TODO: fix this placeholder
+                    lesson_id: props.lessonID as string,
                     char_speed: 0, //TODO: fix this placeholder
                     eff_speed: 0, //TODO: fix this placeholder
                     accuracy: averageAccuracy.value,
@@ -164,12 +237,13 @@ function isClip(event: any): event is Clip {
                     currentState.value = "ERROR: You weren't logged in when the lesson started. Not saved.";
                   }
                   else{
-                    throw new Error('Bad response.');
+                    throw new Error('Error in transcription request... app is shutting down.');
                   }
               }
         }catch(error){
+            let newError = error as Error;
             console.error('Error during transcription:', error);
-            currentState.value = ("Error in transcription Request... app is shutting down.");
+          //  currentState.value = (newError.message);
             recorderController.stopSilenceDetection();
             recorderController.stopRecording();
         }finally{
@@ -180,10 +254,43 @@ function isClip(event: any): event is Clip {
     }
     }  };
   
-  let recorderController = useRecorder(currentLetter, handleRecordingEvent);;
+    let recorderController = useRecorder(currentLetter, handleRecordingEvent);
 
+    onBeforeMount(async () => {
+    const baseUrl: string = window.location.origin;
+    
+    try{
+      if(!props.lessonID){
+        currentState.value = "ERROR: No lesson specified.";
+        throw new Error("Lesson parameter not specified.");
+      }
 
-  //todo: extract char_speed and effective_speed_wpm values from the player at the end of the session.
+      await axios.post( //const response: AxiosResponse = 
+          baseUrl + '/api/lesson/get',
+          {lessonID: props.lessonID},
+        ).then(response => {
+          const lessonDto = new LessonDto("", "", [""], {name: "", order: -1});
+          Object.assign(lessonDto, response.data);
+          lesson.value = lessonDto;
+         // lesson.value = new LessonDto({...response.data});
+         // const lessonDto = new LessonDto({...lessonDto} as Required<typeof lessonDto>);
+      }).catch((error) => {
+          arrayOfLetters.value = [];
+          currentState.value = "ERROR: The lesson you have requested is not found. Please go back.";
+      // if(response.status === HttpStatusCode.NotFound){
+          //throw new Error("Lesson not found in DB!");
+          return Promise.reject(error)
+        });
+        currentState.value = "Waiting for voice..."
+  }catch(error){
+      recorderController?.stopRecording();
+      recorderController?.stopSilenceDetection();
+    console.log(error)
+  }   
+ 
+    });
+
+  //TODO: extract char_speed and effective_speed_wpm values from the player at the end of the session.
   const lessonStatistics = ref<Array<singleCodeStat>>([])
   interface singleCodeStat {
     code: string,
@@ -214,33 +321,74 @@ function isClip(event: any): event is Clip {
       recorderController.beginRecording();
       currentLetterAtEndOfPlay = currentLetter.value; //preventing user from calling startRecording after pressing play again on same letter
     }
-    // eslint-disable-next-line no-self-assign
-    //currentID.value = currentID.value.valueOf(); // trigger the watcher by assigning the value to itself
   }
   let currentLetterAtEndOfPlay: string | undefined;
 
   watch(micSensitivity, async (newValue) => {
     recorderController.micSensitivity = newValue;
   });
+
+  const loggedIn = ref(false)
+  async function checkLoggedIn() {
+    const baseUrl: string = window.location.origin;
+
+  try {
+      await axios.get(baseUrl + '/api/authentication/profile');
+      loggedIn.value = true;
+  } catch (error) {
+    if ((error as AxiosError).status === HttpStatusCode.Unauthorized){
+      loggedIn.value = false;
+    }
+  }
+}
+
+checkLoggedIn();
+
+const cwDefaults = ref<CWSettings>({
+    user_id: '0', // Set to 0 for testing
+    char_speed: 0,
+    effective_speed_wpm: 0,
+    playback_tone_hz: 0,
+    session_length: 0,
+  });
+
+    const settingsLoadError: Ref<string | null> = ref(null);
+    
+    async function fetchSettings(){
+      settingsLoadError.value = null;
+      try {
+        const response = await axios.get('/api/settings');
+        cwDefaults.value = response.data;
+
+        //TODO: Add CW defaults to Pinia for this session!
+        hasSettings.value = true;
+      } catch (error) {
+        settingsLoadError.value = (error as Error).message;
+        hasSettings.value = false;
+      }
+    };
+    fetchSettings();
+
 </script>
 
 <template>
-    <!-- <div class="wrapper"> -->
-      <header>
-        <h1>Lesson Page</h1>
-      </header>
+  <header>
+    <NavigationHeader/>
+  </header>
+    <div v-if="loggedIn">
       <main>
-      <!-- <section class="main-controls"> -->
-        <!--<canvas class="visualizer" height="60px"></canvas> -->
-        <!-- <div id="buttons">
-          <button class="record" @click="recorderController.startRecording">Record</button>
-          <button class="stop" @click="recorderController.stopRecording">Stop</button>
-        </div>
-      </section> -->
+    <h1>Lesson Page</h1>
+    <h2>Name: {{ lesson?.lesson_name }}, Group: {{ lesson?.group.name ?? "Unknown" }}</h2>
       <p id="currentstate">{{ currentState }}</p>
       <p id="currentletter">{{ currentLetter }}</p>
       <div>Adjust microphone sensitivity: <input v-model="micSensitivity" type="range" min="0.001" max="0.01" step="0.001" id="mic-sensitivity"></div>
-      <AudioPlayer @playbackFinished="cwStoppedPlaying" :current-text="currentLetter"></AudioPlayer>
+      <div v-if="!currentLetter">Loading lesson text...</div>
+      <div v-else>
+        <AudioPlayer @playbackFinished="cwStoppedPlaying" :current-text="currentLetter" v-if="hasSettings"></AudioPlayer>
+      </div>
+
+
+    <!-- //TODO: Manually adjust lesson results before submission to allow for the correction of any errors in the speech-to-text recognition -->
       <div v-if="showStatistics">
         <h2>Lesson Statistics:</h2>
         <ul>
@@ -252,22 +400,11 @@ function isClip(event: any): event is Clip {
         <p>Total time to answer: {{ totalTimeToAnswer/1000 }}</p>
       </div>
   
-      <!-- <section v-show="showSoundClips" class="sound-clips" ref="pElementRef">
-        <span v-if="recorderController.allClips.length === 0">You have no sound clips recorded.</span>
-        <article v-for="(clip, index) in recorderController.allClips" :key="index" class="clip">
-          <audio controls :src="recorderController.getAudioURL(clip.audio)"></audio>
-          <p>{{ clip.name }}</p>
-          <span v-if="clip.transcription">{{ clip.transcription }}</span>
-          <button @click="recorderController.deleteRecording(index)">Delete</button>
-          <button @click="transcriber.transcribe(index)">Transcribe</button>
-        </article>
-      </section> -->
-      
-      <!-- <button @click="showSoundClips = !showSoundClips">
-          {{ showSoundClips ? 'Hide sound clips' : 'Show sound clips' }}
-      </button> -->
-    <!--</div> -->
     </main>
+    </div>
+  <div v-else>
+    <p>Error: You are not logged in, so you cannot complete this lesson.</p>
+  </div>
   </template>
 
 <style>

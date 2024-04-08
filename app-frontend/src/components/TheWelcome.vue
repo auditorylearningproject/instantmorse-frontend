@@ -9,31 +9,32 @@ import SupportIcon from './icons/IconSupport.vue'
 
 <template>
   <WelcomeItem>
-    <template #icon>
+    <!-- <template #icon>
       <DocumentationIcon />
-    </template>
+    </template> -->
     <template #heading>Project Members</template>
 
   </WelcomeItem>
 
   <WelcomeItem>
-    <template #icon>
+    <!-- <template #icon>
       <ToolingIcon />
     </template>
+    Calvin -->
     Calvin
   </WelcomeItem>
 
   <WelcomeItem>
-    <template #icon>
+    <!-- <template #icon>
       <EcosystemIcon />
-    </template>
+    </template> -->
     David
   </WelcomeItem>
 
   <WelcomeItem>
-    <template #icon>
+    <!-- <template #icon>
       <CommunityIcon />
-    </template>
+    </template> -->
 
     Kento
   </WelcomeItem>

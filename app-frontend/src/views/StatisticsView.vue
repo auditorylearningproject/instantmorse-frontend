@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { AttemptDto } from '@/dto/attempt.dto';
 import type { AxiosResponse } from 'axios';
 import axios from 'axios';
 import { computed, onMounted, ref } from 'vue';
@@ -11,20 +12,20 @@ onMounted(async () => {
     attempts.value = response.data;
 
 });
-const attempts = ref([]);
+const attempts = ref<AttemptDto[]>([]);
 const groupedAttempts = computed(() => {
-const groups = {};
-attempts.value.forEach((attempt) => {
-    if (!groups[attempt.lesson_id]) {
-    groups[attempt.lesson_id] = {
-        lesson_id: attempt.lesson_id,
-        attempts: [],
-    };
-    }
-    groups[attempt.lesson_id].attempts.push(attempt);
-});
-return Object.values(groups);
-});
+      const grouped = attempts.value.reduce((acc, attempt) => {
+        const lessonId = attempt.lesson_id.toString(); // Convert ObjectId to string
+        if (!acc[lessonId]) {
+          acc[lessonId] = [];
+        }
+        acc[lessonId].push(attempt);
+        return acc;
+      }, {} as { [key: string]: AttemptDto[] }); //error here
+      return grouped;
+    });
+// return Object.values(groups);
+// });
   
 
 </script>
@@ -43,8 +44,8 @@ return Object.values(groups);
     </thead>
     <tbody>
       <template v-for="attemptGroup in groupedAttempts" :key="attemptGroup.lesson_id">
-        <tr v-for="attempt in attemptGroup.attempts" :key="attempt.date_time">
-          <td>{{ attemptGroup.lesson_id }}</td>
+        <tr v-for="attempt in attemptGroup" :key="attempt.date_time.toString()">
+          <td>{{ attemptGroup[0].lesson_id }}</td>
           <td>{{ attempt.char_speed }}</td>
           <td>{{ attempt.eff_speed }}</td>
           <td>{{ attempt.accuracy }}</td>

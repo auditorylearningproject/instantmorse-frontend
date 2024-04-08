@@ -1,8 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import RecordView from '@/views/RecordView.vue'
-import AudioPlayerVue from '@/views/AudioPlayer.vue'
 import StatisticsVue from '@/views/StatisticsView.vue'
+import SettingsView from '@/views/CWSettings.vue'
 import AuthenticationView from '@/views/AuthenticationView.vue'
 import RegistrationView from '@/views/RegistrationView.vue'
 import LessonViewVue from '@/views/LessonView.vue'
@@ -33,16 +33,11 @@ const router = createRouter({
       component: RecordView
     },
     {
-      path: '/lesson',
+      path: '/lesson/:lessonID',
       name: 'lesson-page',
       meta: { layout: 'BlankLayout', pageTitle: "Lesson Page"},
-      component: LessonViewVue
-    },
-    {
-      path: '/cw-widget',
-      name: 'playcw',
-      meta: { layout: 'BlankLayout'},
-      component: AudioPlayerVue
+      component: LessonViewVue,
+      props: true,
     },
     {
       path: '/authentication',
@@ -54,7 +49,7 @@ const router = createRouter({
       path: '/registration',
       name: 'Registration',
       meta: { layout: 'BlankLayout', pageTitle: "Registration Page" },
-      component: RegistrationView
+      component: RegistrationView,
     },
     {
       path: '/lessonSelect',
@@ -69,12 +64,27 @@ const router = createRouter({
       component: StatisticsVue
     },
     {
+      path: '/settings',
+      name: 'cwsettings',
+      meta: { layout: 'BlankLayout', pageTitle: "CW Settings"},
+      component: SettingsView
+    },
+    {
       path: '/:catchAll(.*)',
       name: 'notFound',
       component: () => import ('../views/404.vue'),
       meta: { layout: 'BlankLayout', pageTitle: "404 Not Found" }
     }
   ]
-})
+});
+
+// https://www.digitalocean.com/community/tutorials/vuejs-advanced-vue-routing
+// router.beforeEach((to, from, next) => {
+//   if (to.name !== 'Authentication') {
+//     next({ name: 'Authentication' });
+//   } else {
+//     next();
+//   }
+// });
 
 export default router
