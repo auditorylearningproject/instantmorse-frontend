@@ -10,9 +10,11 @@ import { useRoute, useRouter } from 'vue-router'
 import { LessonDto } from "@/dto/lesson.dto";
 import { shuffle } from 'lodash-es'
 import type { CWSettings } from '@/dto/cwsettings.dto';
+import { useSettingsStore } from '@/stores/settings';
 
 const router = useRouter()
 const route = useRoute()
+const cwSettings = useSettingsStore()
 
   const props = defineProps<{
     lessonID: string
@@ -257,6 +259,7 @@ function hasSentences(obj: LessonDto): boolean {
     let recorderController = useRecorder(currentLetter, handleRecordingEvent);
 
     onBeforeMount(async () => {
+    
     const baseUrl: string = window.location.origin;
     
     try{
@@ -289,7 +292,7 @@ function hasSentences(obj: LessonDto): boolean {
   }   
  
     });
-
+//TODO: add another string to the screen to display waiting for voice/voice being detected/decoding
   //TODO: extract char_speed and effective_speed_wpm values from the player at the end of the session.
   const lessonStatistics = ref<Array<singleCodeStat>>([])
   interface singleCodeStat {
@@ -359,8 +362,8 @@ const cwDefaults = ref<CWSettings>({
       try {
         const response = await axios.get('/api/settings');
         cwDefaults.value = response.data;
+        cwSettings.updateUserSettings(cwDefaults.value.char_speed, cwDefaults.value.effective_speed_wpm, cwDefaults.value.playback_tone_hz);
 
-        //TODO: Add CW defaults to Pinia for this session!
         hasSettings.value = true;
       } catch (error) {
         settingsLoadError.value = (error as Error).message;
@@ -379,8 +382,8 @@ const cwDefaults = ref<CWSettings>({
       <main>
     <h1>Lesson Page</h1>
     <h2>Name: {{ lesson?.lesson_name }}, Group: {{ lesson?.group.name ?? "Unknown" }}</h2>
-      <p id="currentstate">{{ currentState }}</p>
-      <p id="currentletter">{{ currentLetter }}</p>
+      <p id="currentstate">{{ currentState }}</p>  <!-- The currentState describes the current status of the question you're on. It tells you if you got it right, wrong, or if there was an error -->
+      <!-- <p id="currentletter">{{ currentLetter }}</p> -->
       <div>Adjust microphone sensitivity: <input v-model="micSensitivity" type="range" min="0.001" max="0.01" step="0.001" id="mic-sensitivity"></div>
       <div v-if="!currentLetter">Loading lesson text...</div>
       <div v-else>
