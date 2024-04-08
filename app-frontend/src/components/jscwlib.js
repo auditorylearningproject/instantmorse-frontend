@@ -641,13 +641,17 @@ export class jscw {
 
         this.control_labels = {};
         this.control_inputs = {};
+        
 
+        //pinia userSettings store controlled variables
         this.wpm = 20;
         this.eff = 0;
         this.ews = 0; // extra word space
         this.freq = 600;
         this.volume = 0.5; // relative volume how CW is generated internally
         this.playvolume = 1; // player volume (relative * player volume = total volume)
+        //end of pinia userSettings controlled varaibles
+
         this.q = 10;
         this.dotlen;
         this.playLength = 0;
@@ -936,6 +940,14 @@ export class jscw {
                 this.gainNodePlay.gain.setValueAtTime(v, this.audioCtx.currentTime);
             }
         };
+
+        watch (
+            userSettings.state,
+            (state) => {
+                localStorage.setItem('piniaState', JSON.stringify(state))
+            },
+            {deep: true}
+        )
 
         this.setStartDelay = function (s) {
             console.log("setStartDelay = " + s);
