@@ -6,6 +6,7 @@
  *
  *  The MIT license applies.
  */
+import { ref, watch } from 'vue'
 
 export class jscw {
     constructor(params) {
