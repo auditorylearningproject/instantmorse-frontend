@@ -1,14 +1,15 @@
 <script setup lang="ts">
-  
+import NavigationHeader from '../components/NavigationHeader.vue';
 import { computed, ref, watch, type Ref, onBeforeMount } from "vue";
 import { Transcriber, useRecorder, RecorderEventType, type Clip } from "@/components/speech_to_text"
 import AudioPlayer from "@/components/AudioPlayer.vue";
 import { type AttemptDto } from "@/dto/attempt.dto";
 import type { AxiosResponse } from "axios";
-import axios, { HttpStatusCode } from "axios";
+import axios, { AxiosError, HttpStatusCode } from "axios";
 import { useRoute, useRouter } from 'vue-router'
 import { LessonDto } from "@/dto/lesson.dto";
 import { shuffle } from 'lodash-es'
+import type { CWSettings } from '@/dto/cwsettings.dto';
 
 const router = useRouter()
 const route = useRoute()
@@ -91,16 +92,22 @@ function isClip(event: any): event is Clip {
   const showStatistics = ref(false);
   const micSensitivity = ref(0.003);  
   const lesson = ref<LessonDto | null>(null);
+  const hasSettings = ref(false);
+
   
   watch(() => props.lessonID, (newId, oldId) => {
     console.log("LESSON ID CHANGED!");
   });
 
-  watch(lesson, (newLesson, oldLesson) => {
+  watch(lesson, async (newLesson, oldLesson) => {
   if (newLesson instanceof LessonDto) {
     const numGroups = 20;
-      //TODO: get defaults from DB API /api/settings
 
+    const settingsDidLoad = await hasSettings;
+    if(!settingsDidLoad){
+      console.error("Settings for the user didn't load, aborting lesson load.");
+      return
+    }
     if(hasSentences(newLesson)){
       let shuffleSentences: string[] = shuffle(newLesson.array_o_chars);
       shuffleSentences = extractWords(shuffleSentences, numGroups);
@@ -212,7 +219,7 @@ function hasSentences(obj: LessonDto): boolean {
                                  
                   showStatistics.value = true;
                   const attempt: AttemptDto = {
-                    lesson_id: props.lessonID as string,//TODO: fix this placeholder
+                    lesson_id: props.lessonID as string,
                     char_speed: 0, //TODO: fix this placeholder
                     eff_speed: 0, //TODO: fix this placeholder
                     accuracy: averageAccuracy.value,
@@ -261,7 +268,6 @@ function hasSentences(obj: LessonDto): boolean {
       await axios.post( //const response: AxiosResponse = 
           baseUrl + '/api/lesson/get',
           {lessonID: props.lessonID},
-          // {headers: { "Content-Type": "text/plain" }}
         ).then(response => {
           const lessonDto = new LessonDto("", "", [""], {name: "", order: -1});
           Object.assign(lessonDto, response.data);
@@ -315,38 +321,74 @@ function hasSentences(obj: LessonDto): boolean {
       recorderController.beginRecording();
       currentLetterAtEndOfPlay = currentLetter.value; //preventing user from calling startRecording after pressing play again on same letter
     }
-    // eslint-disable-next-line no-self-assign
-    //currentID.value = currentID.value.valueOf(); // trigger the watcher by assigning the value to itself
   }
   let currentLetterAtEndOfPlay: string | undefined;
 
   watch(micSensitivity, async (newValue) => {
     recorderController.micSensitivity = newValue;
   });
+
+  const loggedIn = ref(false)
+  async function checkLoggedIn() {
+    const baseUrl: string = window.location.origin;
+
+  try {
+      await axios.get(baseUrl + '/api/authentication/profile');
+      loggedIn.value = true;
+  } catch (error) {
+    if ((error as AxiosError).status === HttpStatusCode.Unauthorized){
+      loggedIn.value = false;
+    }
+  }
+}
+
+checkLoggedIn();
+
+const cwDefaults = ref<CWSettings>({
+    user_id: '0', // Set to 0 for testing
+    char_speed: 0,
+    effective_speed_wpm: 0,
+    playback_tone_hz: 0,
+    session_length: 0,
+  });
+
+    const settingsLoadError: Ref<string | null> = ref(null);
+    
+    async function fetchSettings(){
+      settingsLoadError.value = null;
+      try {
+        const response = await axios.get('/api/settings');
+        cwDefaults.value = response.data;
+
+        //TODO: Add CW defaults to Pinia for this session!
+        hasSettings.value = true;
+      } catch (error) {
+        settingsLoadError.value = (error as Error).message;
+        hasSettings.value = false;
+      }
+    };
+    fetchSettings();
+
 </script>
 
 <template>
-    <!-- <div class="wrapper"> -->
-      <header>
-        <h1>Lesson Page</h1>
-        <h2>Name: {{ lesson?.lesson_name }}, Group: {{ lesson?.group.name ?? "Unknown" }}</h2>
-      </header>
+  <header>
+    <NavigationHeader/>
+  </header>
+    <div v-if="loggedIn">
       <main>
-      <!-- <section class="main-controls"> -->
-        <!--<canvas class="visualizer" height="60px"></canvas> -->
-        <!-- <div id="buttons">
-          <button class="record" @click="recorderController.startRecording">Record</button>
-          <button class="stop" @click="recorderController.stopRecording">Stop</button>
-        </div>
-      </section> -->
+    <h1>Lesson Page</h1>
+    <h2>Name: {{ lesson?.lesson_name }}, Group: {{ lesson?.group.name ?? "Unknown" }}</h2>
       <p id="currentstate">{{ currentState }}</p>
       <p id="currentletter">{{ currentLetter }}</p>
       <div>Adjust microphone sensitivity: <input v-model="micSensitivity" type="range" min="0.001" max="0.01" step="0.001" id="mic-sensitivity"></div>
       <div v-if="!currentLetter">Loading lesson text...</div>
       <div v-else>
-        <AudioPlayer @playbackFinished="cwStoppedPlaying" :current-text="currentLetter"></AudioPlayer>
+        <AudioPlayer @playbackFinished="cwStoppedPlaying" :current-text="currentLetter" v-if="hasSettings"></AudioPlayer>
       </div>
 
+
+    <!-- //TODO: Manually adjust lesson results before submission to allow for the correction of any errors in the speech-to-text recognition -->
       <div v-if="showStatistics">
         <h2>Lesson Statistics:</h2>
         <ul>
@@ -358,22 +400,11 @@ function hasSentences(obj: LessonDto): boolean {
         <p>Total time to answer: {{ totalTimeToAnswer/1000 }}</p>
       </div>
   
-      <!-- <section v-show="showSoundClips" class="sound-clips" ref="pElementRef">
-        <span v-if="recorderController.allClips.length === 0">You have no sound clips recorded.</span>
-        <article v-for="(clip, index) in recorderController.allClips" :key="index" class="clip">
-          <audio controls :src="recorderController.getAudioURL(clip.audio)"></audio>
-          <p>{{ clip.name }}</p>
-          <span v-if="clip.transcription">{{ clip.transcription }}</span>
-          <button @click="recorderController.deleteRecording(index)">Delete</button>
-          <button @click="transcriber.transcribe(index)">Transcribe</button>
-        </article>
-      </section> -->
-      
-      <!-- <button @click="showSoundClips = !showSoundClips">
-          {{ showSoundClips ? 'Hide sound clips' : 'Show sound clips' }}
-      </button> -->
-    <!--</div> -->
     </main>
+    </div>
+  <div v-else>
+    <p>Error: You are not logged in, so you cannot complete this lesson.</p>
+  </div>
   </template>
 
 <style>
