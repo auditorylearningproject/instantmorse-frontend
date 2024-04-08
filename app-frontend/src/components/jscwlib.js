@@ -944,7 +944,10 @@ export class jscw {
         watch (
             userSettings.state,
             (state) => {
-                localStorage.setItem('piniaState', JSON.stringify(state))
+                // localStorage.setItem('piniaState', JSON.stringify(state))
+                this.setWpm(userSettings.getWPM())
+                this.setEff(userSettings.getEFF())
+                this.setFreq(userSettings.getFreq())
             },
             {deep: true}
         )

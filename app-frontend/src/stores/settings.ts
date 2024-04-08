@@ -20,6 +20,9 @@ export const useSettingsStore = defineStore({
         },
         getEFF(): number {
             return this.eff || 0;
+        },
+        getFreq(): number {
+            return this.freq || 0;
         }
     },
     actions: {

@@ -130,11 +130,12 @@ function stop() {
 
 // NOT WORKING!!
 // allow the user to download the MP3 file from the player
-function download() {
+// function download() {
     
-}
+// }
 
-function settings() {
-    settingsPane: true
-}
-</script>
+//NOT IMPLEMENTED
+// function settings() {
+//     settingsPane: true
+// }
+// </script>
