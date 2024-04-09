@@ -88,7 +88,9 @@ function isClip(event: any): event is Clip {
 }
   const arrayOfLetters: Ref<string[]> = ref([]);
   const transcriber = new Transcriber()
-  const currentState = ref("Loading lesson...");
+  const currentState = ref("Loading lesson..."); //The currentState describes the current status of the question you're on. It tells you if you got it right, wrong, or if there was an error 
+  const voiceStatus = ref("")
+
   let currentID = ref(0);
   let currentLetter = computed(() => {return arrayOfLetters.value[currentID.value]});
   const showStatistics = ref(false);
@@ -119,7 +121,7 @@ function isClip(event: any): event is Clip {
       arrayOfLetters.value = shuffleSentences;
     }
     //arrayOfLetters.value = lesson.value!.array_o_chars;
-
+    currentState.value = "Lesson load complete."
   }
   console.error(arrayOfLetters.value);
 });
@@ -171,8 +173,9 @@ function hasSentences(obj: LessonDto): boolean {
                 break;
         }
     } else if (isSpecialTuple(event)) { // this is equivalent to RecordingStopped
+          voiceStatus.value = "Recording finished.";
           if(event[0].name?.includes(arrayOfLetters.value[currentID.value]) ?? false){
-            currentState.value = "Letter matched to clip! Checking correctness...";
+            currentState.value = "Checking correctness...";
             const newStat: singleCodeStat = {
               code: "",
               accuracy: false,
@@ -182,7 +185,7 @@ function hasSentences(obj: LessonDto): boolean {
               const transcription = await transcriber.transcribe(currentID.value);
             // newValue[currentID.value].transcription = "placeholder"
               if(transcription === undefined){
-                  currentState.value = ("Transcription service couldn't figure out what you said...")
+                  currentState.value = ("Transcription service couldn't figure out what you said.")
                   newStat.accuracy = false;
                   newStat.code = "N/A";
               } else if(transcription.some(str => { // str is one of the possible transcription possibilities (there may be many).
@@ -200,30 +203,32 @@ function hasSentences(obj: LessonDto): boolean {
                 }
               })){
                   newStat.accuracy = true;
-                  currentState.value = "CORRECT! Moving onto the next letter."
+                  currentState.value = `Correct! The answer was: ${currentLetter.value}`
 
               }else{
-                  currentState.value = (`Incorrect. You said "${transcription[0]}", the letter is ${currentLetter.value}`)
+                  currentState.value = (`Incorrect. You said "${transcription[0]}". The answer was: ${currentLetter.value}`)
               }
-
+              voiceStatus.value = "Play the audio to begin recording."
 
               if(currentID.value < arrayOfLetters.value.length-1){
                   currentID.value++;
+                  //voiceStatus.value = "Play the audio to begin recording."
 
-                  setTimeout(() => {
-                      currentState.value = ("Waiting for voice...")
-                      }, 1000);
               }else{
                   recorderController.stopSilenceDetection();
                   recorderController.stopRecording();
                   console.log("HALTED!");
-                  currentState.value = "No more letters! Congrats."
-                                 
+                  
+                  currentState.value += " | Lesson complete."
+                  /*                  setTimeout(() => {
+                      voiceStatus.value = ("Waiting for voice...")
+                      }, 1000);
+                  */
                   showStatistics.value = true;
                   const attempt: AttemptDto = {
                     lesson_id: props.lessonID as string,
-                    char_speed: 0, //TODO: fix this placeholder
-                    eff_speed: 0, //TODO: fix this placeholder
+                    char_speed: cwSettings.getWPM,
+                    eff_speed: cwSettings.getEFF,
                     accuracy: averageAccuracy.value,
                     time_spent: totalTimeToAnswer.value, //seconds
                     date_time: new Date()
@@ -284,7 +289,7 @@ function hasSentences(obj: LessonDto): boolean {
           //throw new Error("Lesson not found in DB!");
           return Promise.reject(error)
         });
-        currentState.value = "Waiting for voice..."
+        currentState.value = "Play the audio to begin recording."
   }catch(error){
       recorderController?.stopRecording();
       recorderController?.stopSilenceDetection();
@@ -292,8 +297,6 @@ function hasSentences(obj: LessonDto): boolean {
   }   
  
     });
-//TODO: add another string to the screen to display waiting for voice/voice being detected/decoding
-  //TODO: extract char_speed and effective_speed_wpm values from the player at the end of the session.
   const lessonStatistics = ref<Array<singleCodeStat>>([])
   interface singleCodeStat {
     code: string,
@@ -319,12 +322,23 @@ function hasSentences(obj: LessonDto): boolean {
   watch(recorderController.allClips, async (newValue, oldValue) => {
     console.log("new clip added to Pinia local database...") })
 
+  watch(recorderController.noiseDetected, async (newValue, oldValue) => {
+    if(newValue){
+      voiceStatus.value = "Voice detected, listening...";
+    }else{
+      voiceStatus.value = "No voice detected. Ending recording..."
+    }
+  })
+
   function cwStoppedPlaying(){
     if(currentLetter.value !== currentLetterAtEndOfPlay){
       recorderController.beginRecording();
       currentLetterAtEndOfPlay = currentLetter.value; //preventing user from calling startRecording after pressing play again on same letter
     }
+    voiceStatus.value = "Speak now!";
+
   }
+
   let currentLetterAtEndOfPlay: string | undefined;
 
   watch(micSensitivity, async (newValue) => {
@@ -382,7 +396,9 @@ const cwDefaults = ref<CWSettings>({
       <main>
     <h1>Lesson Page</h1>
     <h2>Name: {{ lesson?.lesson_name }}, Group: {{ lesson?.group.name ?? "Unknown" }}</h2>
-      <p id="currentstate">{{ currentState }}</p>  <!-- The currentState describes the current status of the question you're on. It tells you if you got it right, wrong, or if there was an error -->
+      <p id="voicestatus">{{ voiceStatus }}</p>
+      <p id="currentstate">{{ currentState }}</p>  
+
       <!-- <p id="currentletter">{{ currentLetter }}</p> -->
       <div>Adjust microphone sensitivity: <input v-model="micSensitivity" type="range" min="0.001" max="0.01" step="0.001" id="mic-sensitivity"></div>
       <div v-if="!currentLetter">Loading lesson text...</div>
@@ -427,6 +443,10 @@ header {
 
 /* Style the state text */
 #currentstate {
+  font-size: 2em; /* Adjust the size as needed */
+  text-align: center;
+}
+#voicestatus {
   font-size: 4em; /* Adjust the size as needed */
   text-align: center;
 }
