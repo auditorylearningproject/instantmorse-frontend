@@ -54,7 +54,9 @@ export class Transcriber{
                       'Audio-Type': contentType
                   }
               }
-          );
+          ).catch((error) => {
+            throw new TranscriptionError('Error occurred during transcription process');
+          });
           if (typeof response.data == 'string'){
             return [response.data]
           }else if(Array.isArray(response.data) && response.data.every(item => 'transcript' in item && 'confidence' in item)){
