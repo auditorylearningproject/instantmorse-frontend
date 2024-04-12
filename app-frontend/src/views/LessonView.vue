@@ -94,24 +94,41 @@ function isClip(event: any): event is Clip {
   let currentID = ref(0);
   let currentLetter = computed(() => {return arrayOfLetters.value[currentID.value]});
   const showStatistics = ref(false);
-  const micSensitivity = ref(0.003);  
+  const micSensitivity = ref(0.007);  
   const lesson = ref<LessonDto | null>(null);
   const hasSettings = ref(false);
+  const waitingPeriod = ref(false);
 
   
   watch(() => props.lessonID, (newId, oldId) => {
     console.log("LESSON ID CHANGED!");
   });
 
+  function waitForSettings() {
+  return new Promise<boolean>((resolve) => {
+    // Check the value of hasSettings at regular intervals
+    const intervalId = setInterval(() => {
+      if (hasSettings.value === true) {
+        // If hasSettings is true, resolve the Promise and clear the interval
+        clearInterval(intervalId);
+        resolve(true);
+      }
+    }, 100); // Check every 100 milliseconds
+  });
+}
+
   watch(lesson, async (newLesson, oldLesson) => {
   if (newLesson instanceof LessonDto) {
-    const numGroups = 20;
 
-    const settingsDidLoad = await hasSettings;
+    const settingsDidLoad = await waitForSettings();
     if(!settingsDidLoad){
-      console.error("Settings for the user didn't load, aborting lesson load.");
+      console.error("Settings for the user didn't load, aborting lesson load."); // this will never happen unless we add a timeout
       return
     }
+    const numGroups = cwDefaults.value.session_length; // this loaded in now since we waited for settings to load
+    console.log(`Default session length: ${cwDefaults.value.session_length}`)
+    console.log(cwDefaults.value);
+
     if(hasSentences(newLesson)){
       let shuffleSentences: string[] = shuffle(newLesson.array_o_chars);
       shuffleSentences = extractWords(shuffleSentences, numGroups);
@@ -197,10 +214,10 @@ function hasSentences(obj: LessonDto): boolean {
                 }else if(str.toLocaleLowerCase("en-US") === currentLetter.value){
                   newStat.code = currentLetter.value;
                   return true;
-                }else{
-                  newStat.code = str;
-                  return false;
+                }else if(!newStat.code){
+                  newStat.code = str; // do not run this line of code more than once!
                 }
+                return false;
               })){
                   newStat.accuracy = true;
                   currentState.value = `Correct! The answer was: ${currentLetter.value}`
@@ -208,52 +225,43 @@ function hasSentences(obj: LessonDto): boolean {
               }else{
                   currentState.value = (`Incorrect. You said "${transcription[0]}". The answer was: ${currentLetter.value}`)
               }
-              voiceStatus.value = "Play the audio to begin recording."
 
-              if(currentID.value < arrayOfLetters.value.length-1){
-                  currentID.value++;
-                  //voiceStatus.value = "Play the audio to begin recording."
-
-              }else{
-                  recorderController.stopSilenceDetection();
-                  recorderController.stopRecording();
-                  console.log("HALTED!");
-                  
-                  currentState.value += " | Lesson complete."
-                  /*                  setTimeout(() => {
-                      voiceStatus.value = ("Waiting for voice...")
-                      }, 1000);
-                  */
-                  showStatistics.value = true;
-                  const attempt: AttemptDto = {
-                    lesson_id: props.lessonID as string,
-                    char_speed: cwSettings.getWPM,
-                    eff_speed: cwSettings.getEFF,
-                    accuracy: averageAccuracy.value,
-                    time_spent: totalTimeToAnswer.value, //seconds
-                    date_time: new Date()
-                  }
-                  const baseUrl: string = window.location.origin;
-                  const response: AxiosResponse = await axios.post(
-                    baseUrl + '/api/attempt',
-                    attempt
-                  );
-                  if (response.status == HttpStatusCode.Created){
-                    currentState.value = "Attempt saved to database!";
-                  }else if(response.status == HttpStatusCode.Unauthorized){
-                    currentState.value = "ERROR: You weren't logged in when the lesson started. Not saved.";
-                  }
-                  else{
-                    throw new Error('Error in transcription request... app is shutting down.');
-                  }
-              }
         }catch(error){
-            let newError = error as Error;
-            console.error('Error during transcription:', error);
-          //  currentState.value = (newError.message);
+
+          if (error instanceof TranscriptionError) {
+                console.error('Transcription Error:', error.message);
+                currentState.value = "Error in transcription, moving on.";
+                newStat.code = currentLetter.value;
+                newStat.accuracy = false;
+          }
+          else{
             recorderController.stopSilenceDetection();
             recorderController.stopRecording();
+          }
         }finally{
+
+          voiceStatus.value = "Play the audio to begin recording."
+          waitingPeriod.value = false;
+
+          if(currentID.value < arrayOfLetters.value.length-1){
+              currentID.value++;
+              //voiceStatus.value = "Play the audio to begin recording."
+              
+          }else{
+              recorderController.stopSilenceDetection();
+              recorderController.stopRecording();
+              console.log("HALTED!");
+              
+              voiceStatus.value = "Lesson complete.";
+              /*                  setTimeout(() => {
+                  voiceStatus.value = ("Waiting for voice...")
+                  }, 1000);
+              */
+             // waitingPeriod.value = false; // remove the last loading character from the sidebar
+              showStatistics.value = true;
+              
+          }
+
           lessonStatistics.value.push(newStat);
         }
       }else{
@@ -289,7 +297,7 @@ function hasSentences(obj: LessonDto): boolean {
           //throw new Error("Lesson not found in DB!");
           return Promise.reject(error)
         });
-        currentState.value = "Play the audio to begin recording."
+        //currentState.value = "Play the audio to begin recording."
   }catch(error){
       recorderController?.stopRecording();
       recorderController?.stopSilenceDetection();
@@ -326,7 +334,8 @@ function hasSentences(obj: LessonDto): boolean {
     if(newValue){
       voiceStatus.value = "Voice detected, listening...";
     }else{
-      voiceStatus.value = "No voice detected. Ending recording..."
+      voiceStatus.value = "No voice detected. Ending recording...";
+      waitingPeriod.value = true;
     }
   })
 
@@ -334,15 +343,14 @@ function hasSentences(obj: LessonDto): boolean {
     if(currentLetter.value !== currentLetterAtEndOfPlay){
       recorderController.beginRecording();
       currentLetterAtEndOfPlay = currentLetter.value; //preventing user from calling startRecording after pressing play again on same letter
+      voiceStatus.value = "Speak now!";
     }
-    voiceStatus.value = "Speak now!";
-
   }
 
   let currentLetterAtEndOfPlay: string | undefined;
 
   watch(micSensitivity, async (newValue) => {
-    recorderController.micSensitivity = newValue;
+    recorderController.micSensitivity = 0.01 - newValue;  //inverted to make the slider go more sensitive when moved to the right
   });
 
   const loggedIn = ref(false)
@@ -386,6 +394,40 @@ const cwDefaults = ref<CWSettings>({
     };
     fetchSettings();
 
+    const sidebarLettersBesidesCurrent = computed(() => {
+      const currentIndex = currentID.value;
+      const startIndex = Math.max(0, currentIndex - 9);
+      //use the above value for the last 9 letters
+      const endIndex = currentIndex + 1;
+      return lessonStatistics.value.slice(0, endIndex);
+    });
+
+    async function saveStatistics(){
+      showStatistics.value = false; // stop the user from trying to save many times
+
+      const attempt: AttemptDto = {
+                    lesson_id: props.lessonID as string,
+                    char_speed: cwSettings.getWPM,
+                    eff_speed: cwSettings.getEFF,
+                    accuracy: averageAccuracy.value,
+                    time_spent: totalTimeToAnswer.value, //seconds
+                    date_time: new Date()
+                  }
+                  const baseUrl: string = window.location.origin;
+                  const response: AxiosResponse = await axios.post(
+                    baseUrl + '/api/attempt',
+                    attempt
+                  );
+                  if (response.status == HttpStatusCode.Created){
+                    currentState.value = "Attempt saved to database!";
+                  }else if(response.status == HttpStatusCode.Unauthorized){
+                    currentState.value = "ERROR: You weren't logged in when the lesson started. Not saved.";
+                  }
+                  else{
+                    throw new Error('Error in transcription request... app is shutting down.');
+                  }
+    }
+
 </script>
 
 <template>
@@ -393,21 +435,21 @@ const cwDefaults = ref<CWSettings>({
     <NavigationHeader/>
   </header>
     <div v-if="loggedIn">
-      <main>
-    <h1>Lesson Page</h1>
-    <h2>Name: {{ lesson?.lesson_name }}, Group: {{ lesson?.group.name ?? "Unknown" }}</h2>
+  <main>
+    <h1 id="title">Lesson Page</h1>
+    <h2 id="lessonInfo">Name: {{ lesson?.lesson_name }}, Group: {{ lesson?.group.name ?? "Unknown" }}</h2>
       <p id="voicestatus">{{ voiceStatus }}</p>
       <p id="currentstate">{{ currentState }}</p>  
 
       <!-- <p id="currentletter">{{ currentLetter }}</p> -->
-      <div>Adjust microphone sensitivity: <input v-model="micSensitivity" type="range" min="0.001" max="0.01" step="0.001" id="mic-sensitivity"></div>
+      <div id="micAdjust">Adjust microphone sensitivity: <input v-model="micSensitivity" type="range" min="0.001" max="0.010" step="0.001" id="mic-sensitivity"></div>
       <div v-if="!currentLetter">Loading lesson text...</div>
       <div v-else>
         <AudioPlayer @playbackFinished="cwStoppedPlaying" :current-text="currentLetter" v-if="hasSettings"></AudioPlayer>
       </div>
 
+      <button id="saveStats" v-show="showStatistics" @click="saveStatistics">Save Statistics</button>
 
-    <!-- //TODO: Manually adjust lesson results before submission to allow for the correction of any errors in the speech-to-text recognition -->
       <div v-if="showStatistics">
         <h2>Lesson Statistics:</h2>
         <ul>
@@ -418,6 +460,22 @@ const cwDefaults = ref<CWSettings>({
         <p>Average accuracy: {{ averageAccuracy }}</p>
         <p>Total time to answer: {{ totalTimeToAnswer/1000 }}</p>
       </div>
+
+      <div class="sidebar">
+      <ul>
+        
+        <li v-for="(item, index) in sidebarLettersBesidesCurrent" :key="index">
+            <button @click="item.accuracy = !item.accuracy">
+              {{ item.code }}
+              <span v-if="item.accuracy">✔️</span>
+              <span v-else>❌</span>
+            </button>
+        </li>
+        <li v-if="currentID < arrayOfLetters.length && waitingPeriod">
+         {{  currentLetter }} <span>⌛</span>
+        </li>
+      </ul>
+    </div>
   
     </main>
     </div>
@@ -426,35 +484,80 @@ const cwDefaults = ref<CWSettings>({
   </div>
   </template>
 
-<style>
-/* Apply styles to the container */
-.lesson-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100vh; /* Make the container take the full height of the viewport */
-}
+<style scoped>
 
-/* Style the title */
 header {
-  text-align: center;
-}
+    text-align: center;
+    margin-bottom: 20px;
+  }
 
-/* Style the state text */
-#currentstate {
-  font-size: 2em; /* Adjust the size as needed */
-  text-align: center;
-}
-#voicestatus {
-  font-size: 4em; /* Adjust the size as needed */
-  text-align: center;
-}
+  main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 50vh; /* Adjust as needed */
+  }
 
-/* Style the letter text */
-#currentletter {
-  font-size: 8em; /* Adjust the size as needed */
-  text-align: center;
-}
+  h1, h2 {
+    text-align: center;
+  }
+
+  #voicestatus,
+  #currentstate {
+    text-align: center;
+  }
+
+  #mic-sensitivity {
+    margin-top: 10px;
+  }
+
+  .sidebar {
+    position: absolute;
+    right: 10%;
+    top: 50%;
+    transform: translateY(-50%);
+    overflow-y: auto;
+    max-height: calc(100vh - 100px); /* Adjust as needed */
+  }
+
+  .sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .sidebar li {
+    margin-bottom: 5px;
+  }
+
+  /* Styling for AudioPlayer component (assuming it's a separate component) */
+  .audio-player-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px; /* Adjust as needed */
+  }
+
+  /* Additional styling for AudioPlayer component elements if needed */
+  .audio-player-controls {
+    /* Your styles here */
+  }
+  #title{
+    font-size: 2em;
+  }
+  #lessonInfo {
+    font-size: 2em;
+  }
+  #micAdjust {
+    font-size: 1em;
+  }
+  #voicestatus{
+    font-size: 2em;
+  }
+  #currentstate {
+    font-size: 2em;
+  }
+
 </style>
   
