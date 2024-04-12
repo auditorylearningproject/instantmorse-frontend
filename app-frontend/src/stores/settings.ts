@@ -4,6 +4,7 @@ import type { ref, Ref } from 'vue';
 export interface UserSettings {
     wpm?: number; //words per minute
     eff?: number; //effective speed
+    ews?: number; //extra word space
     freq?: number; //frequency (Tone)
 }
 
@@ -21,6 +22,9 @@ export const useSettingsStore = defineStore({
         getEFF(): number {
             return this.eff || 0;
         },
+        getEWS(): number {
+            return this.ews || 0;
+        },
         getFreq(): number {
             return this.freq || 0;
         }
@@ -31,9 +35,10 @@ export const useSettingsStore = defineStore({
             this.eff = 0;
             this.freq = 600;
         },
-        updateUserSettings(w: number, e: number, f: number) {
+        updateUserSettings(w: number, e: number, s: number, f: number) {
             this.wpm = w;
             this.eff = e;
+            this.ews = s;
             if (f > 900) {
                 f = 900;
             } else if (f < 300) {
