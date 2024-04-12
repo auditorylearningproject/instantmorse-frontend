@@ -60,7 +60,7 @@
     const settingsStore = useSettingsStore()
     const currentWPM = settingsStore.getWPM
     console.log(currentWPM)
-    const showSettings: boolean = false
+    var showSettings: boolean = false
     const updateWPM: number = 0
     const updateEFF: number = 0
     const updateEWS: number = 0
@@ -159,7 +159,7 @@
         
     // }
     function toggleSettings() {
-        this.showSettings = !this.showSettings
+        showSettings = !showSettings;
     }
 
     function updateSettings() {
