@@ -12,7 +12,7 @@ onMounted(async () => {
     attempts.value = response.data;
 
 });
-const attempts = ref<AttemptDto[]>([]);
+const attempts = ref<Array<AttemptDto& { lesson_name: string }>>([]);
 const groupedAttempts = computed(() => {
       const grouped = attempts.value.reduce((acc, attempt) => {
         const lessonId = attempt.lesson_id.toString(); // Convert ObjectId to string
@@ -21,7 +21,7 @@ const groupedAttempts = computed(() => {
         }
         acc[lessonId].push(attempt);
         return acc;
-      }, {} as { [key: string]: AttemptDto[] }); //error here
+      }, {} as { [key: string]: Array<AttemptDto& { lesson_name: string }> });
       return grouped;
     });
 // return Object.values(groups);
@@ -34,7 +34,7 @@ const groupedAttempts = computed(() => {
   <table>
     <thead>
       <tr>
-        <th>Lesson ID</th>
+        <th>Lesson Name</th>
         <th>Character Speed</th>
         <th>Effective Speed</th>
         <th>Accuracy</th>
@@ -45,7 +45,7 @@ const groupedAttempts = computed(() => {
     <tbody>
       <template v-for="attemptGroup in groupedAttempts" :key="attemptGroup.lesson_id">
         <tr v-for="attempt in attemptGroup" :key="attempt.date_time.toString()">
-          <td>{{ attemptGroup[0].lesson_id }}</td>
+          <td>{{ attemptGroup[0].lesson_name }}</td>
           <td>{{ attempt.char_speed }}</td>
           <td>{{ attempt.eff_speed }}</td>
           <td>{{ attempt.accuracy }}</td>
