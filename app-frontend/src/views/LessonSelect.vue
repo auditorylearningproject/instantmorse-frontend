@@ -1,8 +1,10 @@
 <template>
-    <div class="lessonSelect">
-        <header>
+<header>
+    <NavigationHeader/>
+</header>
+<main>
+<div class="lessonSelect">
             <h1>Select the Lesson You Would Like to Do</h1>
-        </header>
             <form @submit.prevent='goToHome'>
                 <button class="homePage">Go to the Home Page</button> <br><br>
             </form>
@@ -13,7 +15,8 @@
             <button class='selectionMade'>Go to This Lesson</button> <br><br>
         </form>
     </div>
-    </template>
+</main>
+</template>
 
 <!-- https://www.bezkoder.com/vue-node-express-mongodb-mevn-crud/ -->
 
@@ -21,6 +24,8 @@
     import axios from 'axios';
 import { onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router'
+import NavigationHeader from '../components/NavigationHeader.vue';
+
 
 const router = useRouter()
     // import { ref } from 'vue'

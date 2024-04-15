@@ -15,7 +15,7 @@
     </div>
 
     
-    <button class="text-white hover:text-gray-300 px-4">Logout (broken)</button> <!-- @click=""  -->
+    <button v-show="loggedIn" class="text-white hover:text-gray-300 px-4">Logout (broken)</button> <!-- @click=""  -->
   </nav>
     </div>
   </header>

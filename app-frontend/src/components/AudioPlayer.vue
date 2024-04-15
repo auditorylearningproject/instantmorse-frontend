@@ -34,16 +34,16 @@
     import { createApp } from "vue";
 
     // Import and creat App for Popper
-    import Popper from "vue3-popper";
-    const app = createApp(App);
-    app.component("Popper", Popper);
+   // import Popper from "vue3-popper";
+   // const app = createApp(App);
+   // app.component("Popper", Popper);
 
     // Import and create App for InputNumber
-    import InputNumber from 'primevue/inputnumber';
-    import PrimeVue from 'primevue/config';
-    const app2 = createApp(App);
-    app2.use(PrimeVue);
-    import App from "@/App.vue";
+    //import InputNumber from 'primevue/inputnumber';
+    //import PrimeVue from 'primevue/config';
+    //const app2 = createApp(App);
+    //app2.use(PrimeVue);
+    //import App from "@/App.vue";
     // const wordsPerMinute = ref(30)
     const playerMax = ref(0)
     const playerMaxSec = ref(0)

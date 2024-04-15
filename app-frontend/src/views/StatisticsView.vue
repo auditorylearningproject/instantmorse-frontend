@@ -3,6 +3,7 @@ import type { AttemptDto } from '@/dto/attempt.dto';
 import type { AxiosResponse } from 'axios';
 import axios from 'axios';
 import { computed, onMounted, ref } from 'vue';
+import NavigationHeader from '../components/NavigationHeader.vue';
 
 onMounted(async () => {
     const baseUrl: string = window.location.origin;
@@ -10,6 +11,7 @@ onMounted(async () => {
     baseUrl + '/api/attempt/get-all',
     );
     attempts.value = response.data;
+    console.error(response.data);
 
 });
 const attempts = ref<Array<AttemptDto& { lesson_name: string }>>([]);
@@ -31,6 +33,10 @@ const groupedAttempts = computed(() => {
 </script>
 
 <template>
+  <header>
+    <NavigationHeader/>
+  </header>
+  <main>
   <table>
     <thead>
       <tr>
@@ -55,6 +61,7 @@ const groupedAttempts = computed(() => {
       </template>
     </tbody>
   </table>
+  </main>
 </template>
   <style scoped>
     /* Optional styling for the table */

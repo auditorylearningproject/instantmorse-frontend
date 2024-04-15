@@ -127,7 +127,6 @@ function isClip(event: any): event is Clip {
     }
     const numGroups = cwDefaults.value.session_length; // this loaded in now since we waited for settings to load
     console.log(`Default session length: ${cwDefaults.value.session_length}`)
-    console.log(cwDefaults.value);
 
     if(hasSentences(newLesson)){
       let shuffleSentences: string[] = shuffle(newLesson.array_o_chars);
@@ -140,7 +139,7 @@ function isClip(event: any): event is Clip {
     //arrayOfLetters.value = lesson.value!.array_o_chars;
     currentState.value = "Lesson load complete."
   }
-  console.error(arrayOfLetters.value);
+  console.log(`This lesson's array: ${arrayOfLetters.value}`);
 });
 
 function extractWords(sentences: string[], numWords: number): string[] {
@@ -235,6 +234,8 @@ function hasSentences(obj: LessonDto): boolean {
                 newStat.accuracy = false;
           }
           else{
+            console.error(`Error: halting lesson.`);
+            console.error(error);
             recorderController.stopSilenceDetection();
             recorderController.stopRecording();
           }
@@ -265,7 +266,7 @@ function hasSentences(obj: LessonDto): boolean {
           lessonStatistics.value.push(newStat);
         }
       }else{
-        console.log("A new clip was saved, but it doesn't correspond to the current letter!");
+        console.error("A new clip was saved, but it doesn't correspond to the current letter!");
     }
     }  };
   
@@ -301,7 +302,8 @@ function hasSentences(obj: LessonDto): boolean {
   }catch(error){
       recorderController?.stopRecording();
       recorderController?.stopSilenceDetection();
-    console.log(error)
+      console.error("Error: could not load lesson.");
+      console.log(error)
   }   
  
     });
