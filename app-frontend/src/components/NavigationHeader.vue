@@ -15,7 +15,7 @@
     </div>
 
     
-    <button v-show="loggedIn" class="text-white hover:text-gray-300 px-4">Logout (broken)</button> <!-- @click=""  -->
+    <button v-show="loggedIn" @click="logout" class="text-white hover:text-gray-300 px-4">Logout</button> <!-- @click=""  -->
   </nav>
     </div>
   </header>
@@ -23,10 +23,11 @@
 
   <script setup lang="ts">
 import axios from 'axios';
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, getCurrentInstance, type ComponentInternalInstance } from 'vue';
+import { useRouter } from 'vue-router';
 
 const loggedIn = ref(false);
-
+const router = useRouter()
 onMounted(async () => {
 
 const baseUrl: string = window.location.origin;
@@ -47,5 +48,20 @@ const response = await axios.get(
 if(response && response.data['username']){
     loggedIn.value = true;
 }});
+onMounted(() => {
+  instance = getCurrentInstance();
+});
+let instance: ComponentInternalInstance | null = null;
+function logout(){
+  let cookie = document.cookie.match("Authorization")?.pop() ?? null;
+  if(cookie){
+    console.log("Logging you out.");
+    document.cookie = "Authorization=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=None; Secure;";
+  }
+  router.go(0);
+  router.push({path: "/", force: true});
+  instance!.proxy!.$forceUpdate();
+
+}
 
 </script>
