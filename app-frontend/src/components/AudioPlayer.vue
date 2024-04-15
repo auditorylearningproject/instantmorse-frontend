@@ -5,25 +5,15 @@
         <button @click="pause">Play/Pause</button>
         <button @click="stop">Stop</button>
         <button @click="toggleSettings">Settings</button>
-        <div v-if="showSettings" class="settings">
+        <Panel header="Settings" toggleable collapsed>
+            <!-- <p>This is a standin for the Settings Panel</p> -->
             <InputNumber v-model="updateWPM" inputId="Words Per Minute" mode="decimal" showButtons :min="5" :max="50" />
             <InputNumber v-model="updateEFF" inputId="Effective speed" mode="decimal" showButtons :min="0" :max="50" />
             <InputNumber v-model="updateEWS" inputId="Extra Word Space" mode="decimal" showButtons :min="0" :max="5" />
             <InputNumber v-model="updateFreq" inputId="Frequency" mode="decimal" showButtons :min="300" :max="1500" />
             <button @click="updateSettings">Save Setttings</button>
             <button @click="restoreDefaults">Restore Defaults</button>
-        </div>
-        <!-- <Popper>
-            <button>Settings</button>
-            <template #content>
-                <InputNumber v-model="updateWPM" inputId="Words Per Minute" mode="decimal" showButtons :min="5" :max="50" />
-                <InputNumber v-model="updateEFF" inputId="Effective speed" mode="decimal" showButtons :min="0" :max="50" />
-                <InputNumber v-model="updateEWS" inputId="Extra Word Space" mode="decimal" showButtons :min="0" :max="5" />
-                <InputNumber v-model="updateFreq" inputId="Frequency" mode="decimal" showButtons :min="300" :max="1500" />
-                <button @click="updateSettings">Save Setttings</button>
-                <button @click="restoreDefaults">Restore Defaults</button>
-            </template>
-        </Popper> -->
+        </Panel>
     </div>
 </template>
 
@@ -31,19 +21,9 @@
     import { onMounted, ref, watch, computed } from "vue";
     import { jscw } from "./jscwlib.js";
     import { useSettingsStore } from "@/stores/settings";
-    import { createApp } from "vue";
+    import InputNumber from 'primevue/inputnumber';
+    import Panel from 'primevue/panel';
 
-    // Import and creat App for Popper
-   // import Popper from "vue3-popper";
-   // const app = createApp(App);
-   // app.component("Popper", Popper);
-
-    // Import and create App for InputNumber
-    //import InputNumber from 'primevue/inputnumber';
-    //import PrimeVue from 'primevue/config';
-    //const app2 = createApp(App);
-    //app2.use(PrimeVue);
-    //import App from "@/App.vue";
     // const wordsPerMinute = ref(30)
     const playerMax = ref(0)
     const playerMaxSec = ref(0)
@@ -57,14 +37,14 @@
     const emit = defineEmits(['playbackFinished'])
     const props = defineProps<{ currentText: string}>()
     const currentText = computed(() => props.currentText)
-    const settingsStore = useSettingsStore()
-    const currentWPM = settingsStore.getWPM
-    console.log(currentWPM)
-    var showSettings: boolean = false
-    const updateWPM: number = 0
-    const updateEFF: number = 0
-    const updateEWS: number = 0
-    const updateFreq: number = 0
+    const settingsStore = useSettingsStore();
+    const currentWPM = settingsStore.getWPM;
+    console.log(currentWPM);
+    var showSettings: boolean = false;
+    const updateWPM: number = 0;
+    const updateEFF: number = 0;
+    const updateEWS: number = 0;
+    const updateFreq: number = 0;
 
     function setup_jscw() {
         jscw_var.setWpm(settingsStore.getWPM)
