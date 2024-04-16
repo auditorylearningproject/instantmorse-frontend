@@ -4,10 +4,10 @@
 </header>
 <main>
 <div class="lessonSelect">
-            <h1>Select the Lesson You Would Like to Do</h1>
-            <form @submit.prevent='goToHome'>
-                <button class="homePage">Go to the Home Page</button> <br><br>
-            </form>
+        <h1>Select the Lesson You Would Like to Do</h1>
+        <form @submit.prevent='goToHome'>
+            <button class="homePage">Go to the Home Page</button> <br><br>
+        </form>
     </div>
     <div>
         <v-select :options="lessons" label="lesson_name" v-model="selectedItem"></v-select>
@@ -31,10 +31,10 @@
     const router = useRouter()
         // import { ref } from 'vue'
     interface Lesson {
-    _id: number;
-    lesson_name: string;
-    array_o_chars: string[];
-    group: object;
+        _id: number;
+        lesson_name: string;
+        array_o_chars: string[];
+        group: object;
     }
 
     let lessons: Lesson[] = [{_id: -1, lesson_name: "Please wait...", array_o_chars: [], group: {} }];
@@ -46,6 +46,7 @@
     });
 
     let selectedItemThing = "";
+    
     const goToHome = async () => {
         console.log("Ladies and Gentlemen, we got him");
         try {
