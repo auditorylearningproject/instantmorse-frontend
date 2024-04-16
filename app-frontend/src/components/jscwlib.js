@@ -6,6 +6,8 @@
  *
  *  The MIT license applies.
  */
+import { ref, watch } from 'vue'
+import { useSettingsStore } from "@/stores/settings"
 
 export class jscw {
     constructor(params) {
@@ -641,7 +643,6 @@ export class jscw {
 
         this.control_labels = {};
         this.control_inputs = {};
-        
 
         //pinia userSettings store controlled variables
         this.wpm = 20;
@@ -940,11 +941,15 @@ export class jscw {
                 this.gainNodePlay.gain.setValueAtTime(v, this.audioCtx.currentTime);
             }
         };
-
+        
+        let userSettings = useSettingsStore();
         watch (
             userSettings.state,
             (state) => {
-                localStorage.setItem('piniaState', JSON.stringify(state))
+                // localStorage.setItem('piniaState', JSON.stringify(state))
+                this.setWpm(userSettings.getWPM())
+                this.setEff(userSettings.getEFF())
+                this.setFreq(userSettings.getFreq())
             },
             {deep: true}
         )

@@ -1,7 +1,10 @@
 
 
 <template>
-
+  <header>
+    <NavigationHeader/>
+  </header>
+  <main>
   <h2>Random Checkbox</h2>
   <input type="checkbox" id="checkbox" v-model="checked">
   <label for="checkbox">Checked: {{ checked }}</label>
@@ -44,10 +47,11 @@
       </form>
     </div>
   </div>
+</main>
 </template>
 
 <script setup lang="ts">
-
+import NavigationHeader from '../components/NavigationHeader.vue';
 import type { CWSettings } from "src/dto/cwsettings.dto";
 import { ref, reactive, type Ref } from 'vue';
 import axios from 'axios';
