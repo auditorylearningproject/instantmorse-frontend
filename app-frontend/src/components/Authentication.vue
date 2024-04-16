@@ -1,4 +1,8 @@
 <template>
+<header>
+    <NavigationHeader/>
+</header>
+<main>
     <div class="authentication">
         <header>
             <h1>Authentication Page</h1>
@@ -16,10 +20,12 @@
             <button class="register">Not Registered? Click Here!</button>
         </form>
     </div>
-    </template>
+</main>
+</template>
 
 <script lang="ts">
     import axios from 'axios';
+    import NavigationHeader from '../components/NavigationHeader.vue';
     export default {
         data() {
             return {

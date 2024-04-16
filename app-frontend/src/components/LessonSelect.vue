@@ -83,6 +83,4 @@ header {
 option.name {
     text-decoration-color: rgb(0, 0, 0);
 }
-
-
 </style>

@@ -55,7 +55,7 @@ const router = createRouter({
       path: '/lessonSelect',
       name: 'SelectLesson',
       meta: { layout: 'BlankLayout', pageTitle: "Select Lesson Page" },
-      component: () => import('../views/LessonSelect.vue')
+      component: () => import('../views/LessonSelectView.vue')
     },
     {
       path: '/statistics',
