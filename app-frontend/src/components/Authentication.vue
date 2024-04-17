@@ -1,7 +1,4 @@
 <template>
-<header>
-    <NavigationHeader/>
-</header>
 <main>
     <div class="authentication">
         <header>

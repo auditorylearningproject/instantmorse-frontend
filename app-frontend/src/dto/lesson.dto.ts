@@ -1,6 +1,6 @@
 export class LessonDto {
   constructor(
-      public id: string,
+      public _id: string,
       public lesson_name: string,
       public array_o_chars: string[],
       public group: { name: string; order: number },
