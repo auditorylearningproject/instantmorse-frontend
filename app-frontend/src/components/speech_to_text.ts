@@ -116,7 +116,7 @@ type RecorderEventCallback = (eventType: RecorderEventType | [Clip, number]) => 
 export function useRecorder(currentLetter: ComputedRef<string>, eventCallback: RecorderEventCallback){
 
   if (('webkitSpeechRecognition' in window)) {
-    // browser (Chrome) supports Web Speech API - we don't need to use our own solution - use speech_to_text_chrome.ts
+    // TODO: browser (Chrome) supports Web Speech API - we don't need to use our own solution - use speech_to_text_chrome.ts
     //const possibleResults = await listenChrome()
   }
 
@@ -209,7 +209,7 @@ class RecorderController{
   analyser!: AnalyserNode;
   silenceTimeout: number | null = null;
   silenceThreshold = 100; //frequency in Hz
-  audioLoopSize = 100;
+  audioLoopSize = 50; // **** LOOP SIZE ****
 
   micSensitivity = 0.003;
 
@@ -218,7 +218,8 @@ class RecorderController{
   callbackRecordStop?: () => void;
   
   beginRecording(){ //only called by the Lesson View.
-      if(this.mediaRecorder){
+    this.beginRecordTimestamp = performance.now();
+    if(this.mediaRecorder){
         this.startRecording();
       }else{
         shouldStartImmediately = this;
@@ -226,7 +227,6 @@ class RecorderController{
   }
   startRecording(){
     this.lastEnd = 0;
-    this.beginRecordTimestamp = performance.now();
     this.firstNoiseTimestamp = null;
     this.mediaRecorder!.start(this.audioLoopSize); // this makes the ondataavailable function get called every audioLoopSize milliseconds, or when the recording stops.
     this.audioContext.resume();
@@ -243,18 +243,25 @@ class RecorderController{
     this.mediaRecorder! = new MediaRecorder(stream, {audioBitsPerSecond: this.audioBitsPerSecond });
   
     this.mediaRecorder!.ondataavailable = (e: { data: any; }) => {
-      if (e.data.size > 500 && this.mediaRecorder!.state === "recording") {
+      const tempTimestamp = performance.now();
+      if (this.mediaRecorder!.state === "recording") {
         // Handle recorded data
         this.data.push(e.data);
-        this.detectSilence();
-       } else if (e.data.size <= 500 ){
-          this.data.push(e.data)  
-      }else if(this.mediaRecorder!.state !== "recording"){
+      }
+      //  } else if (e.data.size <= 500 ){
+      //     this.data.push(e.data)  
+      // }
+      else{ //if(this.mediaRecorder!.state !== "recording"){
         console.log("data passed after recording stopped, doing nothing.");
+      }
+      if(e.data.size > 500 || this.data.reduce((accumulator, blob) => accumulator + blob.size, 0) > 500){ // if the entire recording so far is > 500 (or if the current one is to avoid wasted computing time)
+        this.detectSilence(tempTimestamp);
       }
     };
     this.callbackRecordStop!()
     callbackMediaStreamReady()
+
+
   
   }
   
@@ -275,7 +282,7 @@ class RecorderController{
     // if (!(this instanceof this.audioBufferSlice)) {
     //   this.audioBufferSlice(buffer, begin, end, callback);
     // }
-  
+    const tempTimestamp = performance.now();
     let error = null;
   
     const duration = buffer.duration;
@@ -312,12 +319,12 @@ class RecorderController{
     const frameCount = endOffset - startOffset;
     //console.log("startoffset: ", startOffset, " endOffset: ", endOffset);
     let newArrayBuffer;
-    if(frameCount < 0){
-      console.error("endoffset is smaller than startoffset! Error...");
+    if(frameCount <= 0){
+      console.error("The audio snippet slice period is not valid.");
       return;
     }
     try {
-      newArrayBuffer = this.audioContext.createBuffer(channels, endOffset - startOffset, rate);
+      newArrayBuffer = this.audioContext.createBuffer(channels, frameCount, rate);
       const anotherArray = new Float32Array(frameCount);
       const offset = 0;
   
@@ -334,7 +341,7 @@ class RecorderController{
 
   noiseDetected = ref(false);
 
-  async detectSilence() {
+  async detectSilence(timestamp_when_audio_came_in: number) {
     
     const buf: ArrayBuffer = await this.combineAudioBlobs();
     //console.log("buf.bytelength: " + buf.byteLength);
@@ -397,9 +404,10 @@ class RecorderController{
         }
       } else {
         this.noiseDetected.value = true
+
         if(!this.firstNoiseTimestamp){
-          this.firstNoiseTimestamp = performance.now();
-        }
+          this.firstNoiseTimestamp = timestamp_when_audio_came_in; //calculated before to avoid delays
+        }        
         // Reset the timeout when there's noise
         if (this.silenceTimeout !== null) {
           window.clearTimeout(this.silenceTimeout);

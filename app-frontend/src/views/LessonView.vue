@@ -341,12 +341,14 @@ function hasSentences(obj: LessonDto): boolean {
     }
   })
 
-  function cwStoppedPlaying(){
+  async function cwStoppedPlaying(){
     if(currentLetter.value !== currentLetterAtEndOfPlay){
       recorderController.beginRecording();
       currentLetterAtEndOfPlay = currentLetter.value; //preventing user from calling startRecording after pressing play again on same letter
       voiceStatus.value = "Speak now!";
     }
+    console.log("Audio stopped! Recording begun.")
+
   }
 
   let currentLetterAtEndOfPlay: string | undefined;
@@ -400,7 +402,7 @@ const cwDefaults = ref<CWSettings>({
       const currentIndex = currentID.value;
       const startIndex = Math.max(0, currentIndex - 9);
       //use the above value for the last 9 letters
-      const endIndex = currentIndex;
+      const endIndex = currentIndex === arrayOfLetters.value.length-1 ? (currentIndex+1) : currentIndex; //if the lesson is done, go ahead and throw the current letter in the sidebar too.
       return arrayOfLetters.value.slice(0, endIndex); //arrayOfLetters used to be lessonStatistics with currentIndex+1, but I want the actual value shown in the sidebar, not what the user said.
     });
 
@@ -469,8 +471,8 @@ const cwDefaults = ref<CWSettings>({
         <li v-for="(item, index) in sidebarLettersBesidesCurrent" :key="index">
             <button @click="lessonStatistics[index].accuracy = !lessonStatistics[index].accuracy">
               {{ item }}
-              <span v-if="lessonStatistics[index].accuracy">✔️</span>
-              <span v-else>❌</span>
+              <span v-if="lessonStatistics[index] && lessonStatistics[index].accuracy">✔️</span> <!-- It will try to access the statistics for the last value before its stats have been calculated-->
+              <span v-else-if="lessonStatistics[index]">❌</span>
             </button>
         </li>
         <li v-if="currentID < arrayOfLetters.length && waitingPeriod">

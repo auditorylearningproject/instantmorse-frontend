@@ -1498,7 +1498,7 @@ export class jscw {
         };
 
         this.startLoop = function () {
-            window.setInterval(this.progressbarUpdate2, 50, this);
+            window.setInterval(this.progressbarUpdate2, 50 /* LOOP SIZE */, this); // the second argument defines the time in ms that the player should check if the audio finished playing to begin the timer.
         }
 
         this.progressbarUpdate = function (obj) {

@@ -65,6 +65,9 @@ import { update } from "lodash-es";
     }
 
     function updatePlayTime(max: number, value: number) {
+        if (max === value && value !== 0) { // check this first so that the start timer can begin after audio finishes playing
+            emit('playbackFinished')
+        }
         playerMax.value = max
         playerMaxSec.value = playerMax.value % 60
         playerMaxSecOnes.value = playerMaxSec.value % 10
@@ -112,9 +115,7 @@ import { update } from "lodash-es";
         if (intPlayerValue >= 0) {
             playerMinString.value = String(Math.floor(intPlayerValue / 60))
         }
-        if (max === value && value !== 0) {
-            emit('playbackFinished')
-        }
+
     }
 
     // jscwlib player render
