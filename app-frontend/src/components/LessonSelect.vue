@@ -102,7 +102,7 @@
     }; 
     const selecting = async () => {
         try {
-            selectedItemThing = lessonSelected.value!.id;
+            selectedItemThing = lessonSelected.value!._id;
             router.push('/lesson/'+selectedItemThing);
         } catch(error) {
             console.error("Error switching to lesson page", error);
