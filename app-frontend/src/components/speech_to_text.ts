@@ -420,7 +420,7 @@ class RecorderController{
     //this.analyser.disconnect();
   }
   
-  deleteRecording(index: number) {
+  deleteRecording() {
     //allClips.value.splice(index, 1);
     store.clearRecordings();
   }
@@ -585,6 +585,7 @@ class RecorderController{
           console.error(`The following getUserMedia error occurred: ${err}`);
 
         });
+        this.deleteRecording(); // clear the pinia store from previous sessions
     } else {
       console.log("getUserMedia not supported on your browser!");
     }
