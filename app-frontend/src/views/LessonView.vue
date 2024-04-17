@@ -400,8 +400,8 @@ const cwDefaults = ref<CWSettings>({
       const currentIndex = currentID.value;
       const startIndex = Math.max(0, currentIndex - 9);
       //use the above value for the last 9 letters
-      const endIndex = currentIndex + 1;
-      return lessonStatistics.value.slice(0, endIndex);
+      const endIndex = currentIndex;
+      return arrayOfLetters.value.slice(0, endIndex); //arrayOfLetters used to be lessonStatistics with currentIndex+1, but I want the actual value shown in the sidebar, not what the user said.
     });
 
     async function saveStatistics(){
@@ -467,9 +467,9 @@ const cwDefaults = ref<CWSettings>({
       <ul>
         
         <li v-for="(item, index) in sidebarLettersBesidesCurrent" :key="index">
-            <button @click="item.accuracy = !item.accuracy">
-              {{ item.code }}
-              <span v-if="item.accuracy">✔️</span>
+            <button @click="lessonStatistics[index].accuracy = !lessonStatistics[index].accuracy">
+              {{ item }}
+              <span v-if="lessonStatistics[index].accuracy">✔️</span>
               <span v-else>❌</span>
             </button>
         </li>
