@@ -2,17 +2,23 @@
     <p>{{playerMinString + ":" + playerSecString + " / " + playerMaxMinute.toFixed(0) + ":" + playerMaxSecTens.toFixed(0) + playerMaxSecOnes.toFixed(0)}}</p>
 
     <div>
-        <button @click="pause">Play/Pause</button>
-        <button @click="stop">Stop</button>
-        <button @click="toggleSettings">Settings</button>
+        <button @click="pause" type = "button" class="custom-button">Play/Pause</button>
+        <button @click="stop" type = "button" class="custom-button">Stop</button>
         <Panel header="Settings" toggleable collapsed>
             <!-- <p>This is a standin for the Settings Panel</p> -->
-            <InputNumber v-model="updateWPM" inputId="Words Per Minute" mode="decimal" showButtons :min="5" :max="50" />
-            <InputNumber v-model="updateEFF" inputId="Effective speed" mode="decimal" showButtons :min="0" :max="50" />
-            <InputNumber v-model="updateEWS" inputId="Extra Word Space" mode="decimal" showButtons :min="0" :max="5" />
-            <InputNumber v-model="updateFreq" inputId="Frequency" mode="decimal" showButtons :min="300" :max="1500" />
-            <button @click="updateSettings">Save Setttings</button>
-            <button @click="restoreDefaults">Restore Defaults</button>
+            <h2>Words Per Minute</h2>
+            <InputNumber v-model="updateWPM" placeholder = "5" inputId ="minmax-buttons" mode="decimal" showButtons suffix="WPM" :min="0" :max="50"/>
+            <h2>Effective Word Speed</h2>
+            <InputNumber v-model="updateEFF" inputId="minmax-buttons" mode="decimal" showButtons suffix="WPM" :min="0" :max="updateWPM">
+            </InputNumber>
+            <h2>Extra Word Space</h2>
+            <InputNumber v-model="updateEWS" inputId="minmax-buttons" mode="decimal" showButtons suffix="x" :min="0" :max="5" />
+            <h2>Frequency</h2>
+            <InputNumber v-model="updateFreq" inputId="minmax-buttons" mode="decimal" showButtons suffix="Hz" :min="300" :max="1500" />
+            <div style="white-space: pre-line"></div>
+            <button @click="updateSettings" type = "submit">Save Setttings</button>
+            <div style="white-space: pre-line"></div>
+            <button @click="restoreDefaults" type = "reset">Restore Defaults</button>
         </Panel>
     </div>
 </template>
@@ -23,6 +29,8 @@
     import { useSettingsStore } from "@/stores/settings";
     import InputNumber from 'primevue/inputnumber';
     import Panel from 'primevue/panel';
+import { update } from "lodash-es";
+    // import ConfirmPopup from 'primevue/confirmpopup';
 
     // const wordsPerMinute = ref(30)
     const playerMax = ref(0)
@@ -38,13 +46,16 @@
     const props = defineProps<{ currentText: string}>()
     const currentText = computed(() => props.currentText)
     const settingsStore = useSettingsStore();
-    const currentWPM = settingsStore.getWPM;
+    var currentWPM: number = settingsStore.getWPM;
+    var currentEFF: number = settingsStore.getEFF;
+    var currentEWS: number = settingsStore.getEWS;
+    var currentFreq: number = settingsStore.getFreq;
     console.log(currentWPM);
     var showSettings: boolean = false;
-    const updateWPM: number = 0;
-    const updateEFF: number = 0;
-    const updateEWS: number = 0;
-    const updateFreq: number = 0;
+    const updateWPM = ref(currentWPM);
+    const updateEFF = ref(currentEFF);
+    const updateEWS = ref(currentEWS);
+    const updateFreq = ref(currentFreq);
 
     function setup_jscw() {
         jscw_var.setWpm(settingsStore.getWPM)
@@ -143,10 +154,28 @@
     }
 
     function updateSettings() {
-        settingsStore.updateUserSettings(updateWPM, updateEFF, updateEWS, updateFreq)
+        settingsStore.updateFullUserSettings(updateWPM.value, updateEFF.value, updateEWS.value, updateFreq.value)
+        jscw_var.setWpm(settingsStore.getWPM)
+        jscw_var.setEff(settingsStore.getEFF)
+        jscw_var.setEws(settingsStore.getEWS)
+        jscw_var.setFreq(settingsStore.getFreq)
     }
 
     function restoreDefaults() {
         settingsStore.restoreDefaultSettings()
+        jscw_var.setWpm(settingsStore.getWPM)
+        jscw_var.setEff(settingsStore.getEFF)
+        jscw_var.setEws(settingsStore.getEWS)
+        jscw_var.setFreq(settingsStore.getFreq)
+        updateWPM.value = settingsStore.getWPM
+        updateEFF.value = settingsStore.getEFF
+        updateEWS.value = settingsStore.getEWS
+        updateFreq.value = settingsStore.getFreq
     }
 </script>
+
+<style scoped>
+    .custom-button {
+        margin-right: 10px; /* Adjust as needed */
+    }
+</style>

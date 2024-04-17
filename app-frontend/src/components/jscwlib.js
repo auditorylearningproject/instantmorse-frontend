@@ -949,6 +949,7 @@ export class jscw {
                 // localStorage.setItem('piniaState', JSON.stringify(state))
                 this.setWpm(userSettings.getWPM())
                 this.setEff(userSettings.getEFF())
+                this.setEws(userSettings.getEWS())
                 this.setFreq(userSettings.getFreq())
             },
             {deep: true}
