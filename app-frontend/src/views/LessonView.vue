@@ -133,7 +133,7 @@ function isClip(event: any): event is Clip {
       shuffleSentences = extractWords(shuffleSentences, numGroups);
       arrayOfLetters.value = shuffleSentences
     }else{
-      const shuffleSentences = shuffle(newLesson.array_o_chars.slice(0, numGroups));
+      const shuffleSentences = (shuffle(newLesson.array_o_chars).slice(0, numGroups));
       arrayOfLetters.value = shuffleSentences;
     }
     //arrayOfLetters.value = lesson.value!.array_o_chars;
