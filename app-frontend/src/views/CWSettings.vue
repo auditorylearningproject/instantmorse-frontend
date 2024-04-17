@@ -5,7 +5,7 @@
     <NavigationHeader/>
   </header>
   <main>
-  <h2>Random Checkbox</h2>
+  <!-- <h2>Random Checkbox</h2>
   <input type="checkbox" id="checkbox" v-model="checked">
   <label for="checkbox">Checked: {{ checked }}</label>
 
@@ -14,7 +14,7 @@
   <select v-model="languages" multiple style="width:100px">
     <option>English</option>
   </select>
-  <span>Selected: {{ languages }}</span>
+  <span>Selected: {{ languages }}</span> -->
 
 
   <div class="cw-settings">
