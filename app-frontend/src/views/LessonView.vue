@@ -210,7 +210,7 @@ function hasSentences(obj: LessonDto): boolean {
                 if(phoneticToAlphabetMap.has(lowerString)){
                   newStat.code = phoneticToAlphabetMap.get(lowerString) ?? "Error";
                   return true;
-                }else if(str.toLocaleLowerCase("en-US") === currentLetter.value){
+                }else if(str.toLocaleLowerCase("en-US") === currentLetter.value.toLocaleLowerCase("en-US")){
                   newStat.code = currentLetter.value;
                   return true;
                 }else if(!newStat.code){
