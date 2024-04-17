@@ -1,7 +1,8 @@
 <template>
+    <div style="background: #282c32; color: white;  padding: 3rem; border-radius: 0.3rem">
 <main>
 <div class="lessonSelect">
-        <h1>Select the Lesson You Would Like to Do</h1>
+        <h1>Select the Lesson You Would Like to Do</h1><br>
         <form @submit.prevent='goToHome'>
             <button class="homePage">Go to the Home Page</button> <br><br>
         </form>
@@ -18,9 +19,8 @@
         </form>
     </div>
 </main>
+</div>
 </template>
-
-<!-- https://www.bezkoder.com/vue-node-express-mongodb-mevn-crud/ -->
 
 <script setup lang="ts">
     import 'vue-select/dist/vue-select.css'
@@ -115,7 +115,6 @@
 </script>
 
 <style scoped>
-
 header {
     height: 70px;
     text-align: center;
@@ -123,5 +122,21 @@ header {
 
 option.name {
     text-decoration-color: rgb(0, 0, 0);
+}
+div.v-select {
+  --vs-controls-color: rgb(61, 139, 248);
+  --vs-border-color: rgb(61, 139, 248);
+
+  --vs-dropdown-bg: #282c34;
+  --vs-dropdown-color: #cc99cd;
+  --vs-dropdown-option-color: rgb(61, 139, 248);
+
+  --vs-selected-bg: #c3954c;
+  --vs-selected-color: #eeeeee;
+
+  --vs-search-input-color: #eeeeee;
+
+  --vs-dropdown-option--active-bg: #664cc3;
+  --vs-dropdown-option--active-color: #eeeeee;
 }
 </style>
