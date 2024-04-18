@@ -133,8 +133,20 @@ function isClip(event: any): event is Clip {
       shuffleSentences = extractWords(shuffleSentences, numGroups);
       arrayOfLetters.value = shuffleSentences
     }else{
-      const shuffleSentences = (shuffle(newLesson.array_o_chars).slice(0, numGroups));
-      arrayOfLetters.value = shuffleSentences;
+      if (numGroups > newLesson.array_o_chars.length) {
+        // If numGroups is greater than the length of array_o_chars,
+        // create a new array with random selections from array_o_chars
+        let shuffleChars = Array.from({ length: numGroups }, () => {
+            const randomIndex = Math.floor(Math.random() * newLesson.array_o_chars.length);
+            return newLesson.array_o_chars[randomIndex];
+        });
+        arrayOfLetters.value = shuffleChars;
+
+    } else {
+        // Otherwise, shuffle and slice the array as before
+        let shuffleChars = shuffle(newLesson.array_o_chars).slice(0, numGroups);
+        arrayOfLetters.value = shuffleChars;
+      }
     }
     //arrayOfLetters.value = lesson.value!.array_o_chars;
     currentState.value = "Lesson load complete."
@@ -440,6 +452,7 @@ const cwDefaults = ref<CWSettings>({
   </header>
     <div v-if="loggedIn">
   <main>
+  <div class="lesson-info-container">
     <h1 id="title">Lesson Page</h1>
     <h2 id="lessonInfo">Name: {{ lesson?.lesson_name }}, Group: {{ lesson?.group.name ?? "Unknown" }}</h2>
       <p id="voicestatus">{{ voiceStatus }}</p>
@@ -464,12 +477,12 @@ const cwDefaults = ref<CWSettings>({
         <p>Average accuracy: {{ averageAccuracy }}</p>
         <p>Total time to answer: {{ totalTimeToAnswer/1000 }}</p>
       </div>
-
+    </div>
       <div class="sidebar">
       <ul>
         
         <li v-for="(item, index) in sidebarLettersBesidesCurrent" :key="index">
-            <button @click="lessonStatistics[index].accuracy = !lessonStatistics[index].accuracy">
+            <button v-if="lessonStatistics[index]" @click="lessonStatistics[index].accuracy = !lessonStatistics[index].accuracy">
               {{ item }}
               <span v-if="lessonStatistics[index] && lessonStatistics[index].accuracy">✔️</span> <!-- It will try to access the statistics for the last value before its stats have been calculated-->
               <span v-else-if="lessonStatistics[index]">❌</span>
@@ -500,7 +513,7 @@ header {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 50vh; /* Adjust as needed */
+    /* height: 50vh; Adjust as needed */
   }
 
   h1, h2 {
@@ -562,6 +575,12 @@ header {
   #currentstate {
     font-size: 2em;
   }
+
+  .lesson-info-container {
+  overflow-y: auto;
+  padding: 0 20px; /* Add padding as needed */
+  text-align: center;
+}
 
 </style>
   
