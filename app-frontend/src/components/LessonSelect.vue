@@ -1,25 +1,27 @@
 <template>
-    <div style="background: #282c32; color: white;  padding: 3rem; border-radius: 0.3rem">
 <main>
-<div class="lessonSelect">
-        <h1>Select the Lesson You Would Like to Do</h1><br>
-        <form @submit.prevent='goToHome'>
-            <button class="homePage">Go to the Home Page</button> <br><br>
-        </form>
+<h1>Either Go Home or Select the Lesson You Would Like</h1><br>
+<div class="container">
+    <div style="background: #282c32; color: white;  padding: 3rem; border-radius: 0.3rem">
+        <div class="goHome">
+            <form @submit.prevent='goToHome'>
+                <button class="homePage">Go to the Home Page</button> <br><br>
+            </form>
+        </div>
+        <div class="lessonSelect">
+            <!-- <v-select :options="lessons" label="lesson_name" v-model="selectedItem" v-if="selectedItem"></v-select> -->
+            <v-select :options="groups" label="groupName" v-model="groupSelected" v-if="groups"></v-select>
+            <v-select v-else :options="['Please wait...']"></v-select>
+        </div>
+        <div v-if="groupSelected">
+            <v-select :options="groupSelected.lessons" label="lesson_name" v-model="lessonSelected"></v-select>
+            <form v-if="lessonSelected" @submit.prevent='selecting'>
+                <button class='selectionMade'>Go to This Lesson</button> <br><br>
+            </form>
+        </div>
     </div>
-    <div>
-        <!-- <v-select :options="lessons" label="lesson_name" v-model="selectedItem" v-if="selectedItem"></v-select> -->
-        <v-select :options="groups" label="groupName" v-model="groupSelected" v-if="groups"></v-select>
-        <v-select v-else :options="['Please wait...']"></v-select>
-    </div>
-    <div v-if="groupSelected">
-        <v-select :options="groupSelected.lessons" label="lesson_name" v-model="lessonSelected"></v-select>
-        <form v-if="lessonSelected" @submit.prevent='selecting'>
-            <button class='selectionMade'>Go to This Lesson</button> <br><br>
-        </form>
-    </div>
-</main>
 </div>
+</main>
 </template>
 
 <script setup lang="ts">
@@ -138,5 +140,17 @@ div.v-select {
 
   --vs-dropdown-option--active-bg: #664cc3;
   --vs-dropdown-option--active-color: #eeeeee;
+}
+.container {
+    column-count: 2;
+    column-width: 30px;
+      /* column-gap: 0px; */
+  column-rule: 4px solid rgb(79 185 227);
+}
+h1 {
+    grid-row: span;
+    row-gap: 30px;
+    margin: 0;
+    padding: 0;
 }
 </style>
