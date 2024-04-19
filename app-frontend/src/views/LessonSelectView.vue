@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import LessonSelect from '../components/LessonSelect.vue'
 import NavigationHeader from '../components/NavigationHeader.vue';
 </script>
 
@@ -6,8 +7,7 @@ import NavigationHeader from '../components/NavigationHeader.vue';
   <header>
     <NavigationHeader/>
   </header>
-  <main>
-    <h1>To Be Implemented</h1>
-    <h3>Implementation work is underway on the use case you have selected.</h3>
-</main>
+    <main>
+        <LessonSelect />
+    </main>
 </template>

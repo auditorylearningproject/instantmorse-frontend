@@ -6,11 +6,16 @@ import {nextTick} from 'vue';
 
 import App from './App.vue'
 import router from './router'
+import VueSelect from 'vue-select';
+import PrimeVue from 'primevue/config';
+// import ConfirmationService from 'primevue/confirmationservice';
 
 const app = createApp(App)
 app.use(createPinia())
 app.use(router)
-
+app.use(PrimeVue);
+// app.use(ConfirmationService);
+app.component("v-select", VueSelect);
 app.mount('#app')
 
 const DEFAULT_TITLE = "InstantMorse App";

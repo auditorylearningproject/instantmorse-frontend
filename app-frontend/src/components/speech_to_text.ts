@@ -2,6 +2,7 @@ import { useAudioStore, type Clip } from '@/stores/recorder';
 import axios from 'axios';
 import { type AxiosResponse } from 'axios';
 //import type { Store } from 'pinia';
+import listenChrome  from './speech_to_text_chrome'
 
 export type { Clip }
 
@@ -19,7 +20,7 @@ export class Transcriber{
           //const result = await sendRecordingRequest(recording, null, lang, 0, false, true);
           const result = await this.sendRecordingRequest(recording);
           
-          console.log('Recognition result:', result);
+           console.log('Recognition result:', result);
           
           return result;
         } catch (error) {
@@ -54,7 +55,9 @@ export class Transcriber{
                       'Audio-Type': contentType
                   }
               }
-          );
+          ).catch((error) => {
+            throw new TranscriptionError('Error occurred during transcription process');
+          });
           if (typeof response.data == 'string'){
             return [response.data]
           }else if(Array.isArray(response.data) && response.data.every(item => 'transcript' in item && 'confidence' in item)){
@@ -77,7 +80,7 @@ export class Transcriber{
 
     constructor(){
         store = useAudioStore();
-        console.log("recording store created")
+        //console.log("recording store created")
     
     }
 
@@ -112,6 +115,11 @@ type RecorderEventCallback = (eventType: RecorderEventType | [Clip, number]) => 
 //Composable function - able to react to state changes
 export function useRecorder(currentLetter: ComputedRef<string>, eventCallback: RecorderEventCallback){
 
+  if (('webkitSpeechRecognition' in window)) {
+    // TODO: browser (Chrome) supports Web Speech API - we don't need to use our own solution - use speech_to_text_chrome.ts
+    //const possibleResults = await listenChrome()
+  }
+
 //  const currentLetter = possibleNullCurrentLetter !== null ? possibleNullCurrentLetter.value : 'defaultValue';
 
   const recorderController = new RecorderController(toValue(currentLetter))
@@ -141,7 +149,6 @@ export function useRecorder(currentLetter: ComputedRef<string>, eventCallback: R
       //   alert("Recording not saved.");
       // }
       // else {
-        console.log("recording being saved...")
         const isChrome = navigator.userAgent.indexOf("Chrome") !== -1;
   
         const audioFormat = isChrome ? "webm" : "ogg";
@@ -151,7 +158,6 @@ export function useRecorder(currentLetter: ComputedRef<string>, eventCallback: R
           audio: recording
           }
 
-        console.log(":::", recorderController.currentLetter);
         store.addRecording(recording_clip);      
         
         eventCallback([recording_clip, (this.firstNoiseTimestamp! - this.beginRecordTimestamp!)]); // Emit recording started event
@@ -203,7 +209,7 @@ class RecorderController{
   analyser!: AnalyserNode;
   silenceTimeout: number | null = null;
   silenceThreshold = 100; //frequency in Hz
-  audioLoopSize = 100;
+  audioLoopSize = 50; // **** LOOP SIZE ****
 
   micSensitivity = 0.003;
 
@@ -212,17 +218,15 @@ class RecorderController{
   callbackRecordStop?: () => void;
   
   beginRecording(){ //only called by the Lesson View.
-    console.log("BEGIN RECORDING!");
-      if(this.mediaRecorder){
+    this.beginRecordTimestamp = performance.now();
+    if(this.mediaRecorder){
         this.startRecording();
-        console.log("THIS.STARTRECORDING CALLED.")
       }else{
         shouldStartImmediately = this;
       }
   }
   startRecording(){
     this.lastEnd = 0;
-    this.beginRecordTimestamp = performance.now();
     this.firstNoiseTimestamp = null;
     this.mediaRecorder!.start(this.audioLoopSize); // this makes the ondataavailable function get called every audioLoopSize milliseconds, or when the recording stops.
     this.audioContext.resume();
@@ -231,7 +235,6 @@ class RecorderController{
   stopRecording(){
     if(this.mediaRecorder?.state === 'recording'){
       this.mediaRecorder!.stop(); // triggers callbackRecordStop
-      console.log(this.mediaRecorder!.state);
       this.stopSilenceDetection();
       
     }
@@ -240,18 +243,25 @@ class RecorderController{
     this.mediaRecorder! = new MediaRecorder(stream, {audioBitsPerSecond: this.audioBitsPerSecond });
   
     this.mediaRecorder!.ondataavailable = (e: { data: any; }) => {
-      if (e.data.size > 500 && this.mediaRecorder!.state === "recording") {
+      const tempTimestamp = performance.now();
+      if (this.mediaRecorder!.state === "recording") {
         // Handle recorded data
         this.data.push(e.data);
-        this.detectSilence();
-       } else if (e.data.size <= 500 ){
-          this.data.push(e.data)  
-      }else if(this.mediaRecorder!.state !== "recording"){
+      }
+      //  } else if (e.data.size <= 500 ){
+      //     this.data.push(e.data)  
+      // }
+      else{ //if(this.mediaRecorder!.state !== "recording"){
         console.log("data passed after recording stopped, doing nothing.");
+      }
+      if(e.data.size > 500 || this.data.reduce((accumulator, blob) => accumulator + blob.size, 0) > 500){ // if the entire recording so far is > 500 (or if the current one is to avoid wasted computing time)
+        this.detectSilence(tempTimestamp);
       }
     };
     this.callbackRecordStop!()
     callbackMediaStreamReady()
+
+
   
   }
   
@@ -272,8 +282,7 @@ class RecorderController{
     // if (!(this instanceof this.audioBufferSlice)) {
     //   this.audioBufferSlice(buffer, begin, end, callback);
     // }
-    console.log("AUDIO BUFFER SLICE CALLED!")
-  
+    const tempTimestamp = performance.now();
     let error = null;
   
     const duration = buffer.duration;
@@ -308,14 +317,14 @@ class RecorderController{
     const startOffset = begin === 0 ? 0 : (rate * begin)/1000;
     const endOffset = (rate * end)/1000;
     const frameCount = endOffset - startOffset;
-    console.log("startoffset: ", startOffset, " endOffset: ", endOffset);
+    //console.log("startoffset: ", startOffset, " endOffset: ", endOffset);
     let newArrayBuffer;
-    if(frameCount < 0){
-      console.error("endoffset is smaller than startoffset! Error...");
+    if(frameCount <= 0){
+      console.error("The audio snippet slice period is not valid.");
       return;
     }
     try {
-      newArrayBuffer = this.audioContext.createBuffer(channels, endOffset - startOffset, rate);
+      newArrayBuffer = this.audioContext.createBuffer(channels, frameCount, rate);
       const anotherArray = new Float32Array(frameCount);
       const offset = 0;
   
@@ -330,12 +339,12 @@ class RecorderController{
     callback(error, newArrayBuffer as AudioBuffer);
   }
 
-  noiseDetected = false;
+  noiseDetected = ref(false);
 
-  async detectSilence() {
+  async detectSilence(timestamp_when_audio_came_in: number) {
     
     const buf: ArrayBuffer = await this.combineAudioBlobs();
-    console.log("buf.bytelength: " + buf.byteLength);
+    //console.log("buf.bytelength: " + buf.byteLength);
     this.audioContext.decodeAudioData(buf, async (audioBuffer) => {
 
       const bufferPromise = new Promise<AudioBuffer>((resolve, reject) => {
@@ -379,25 +388,26 @@ class RecorderController{
       const vol = this.autoCorrelate(this.analyser, buffer, this.audioContext.sampleRate);
 
       //const averageVolume = dataArray.reduce((acc, value) => acc + value, 0) / bufferLength;
-      console.log("frequency: ", vol, " buffer slice size: ", bufferLength);
-      console.log("noise detect: ", this.noiseDetected)
+    //  console.log("frequency: ", vol, " buffer slice size: ", bufferLength);
+    //  console.log("noise detect: ", this.noiseDetected.value)
       //sourceNode.disconnect()
 
       if (vol < this.silenceThreshold) {
         // Silence detected, start or reset the timeout
-        if (this.silenceTimeout === null && this.noiseDetected) {
+        if (this.silenceTimeout === null && this.noiseDetected.value) {
           this.silenceTimeout = window.setTimeout(() => 
             {
               this.stopRecording(); 
-              this.noiseDetected = false;
-              console.log("No noise for one second, recording stopped!")
+              this.noiseDetected.value = false;
+              //console.log("No noise for one second, recording stopped!")
             }, 1000); // 1000ms = 1 second
         }
       } else {
-        this.noiseDetected = true
+        this.noiseDetected.value = true
+
         if(!this.firstNoiseTimestamp){
-          this.firstNoiseTimestamp = performance.now();
-        }
+          this.firstNoiseTimestamp = timestamp_when_audio_came_in; //calculated before to avoid delays
+        }        
         // Reset the timeout when there's noise
         if (this.silenceTimeout !== null) {
           window.clearTimeout(this.silenceTimeout);
@@ -418,7 +428,7 @@ class RecorderController{
     //this.analyser.disconnect();
   }
   
-  deleteRecording(index: number) {
+  deleteRecording() {
     //allClips.value.splice(index, 1);
     store.clearRecordings();
   }
@@ -583,6 +593,7 @@ class RecorderController{
           console.error(`The following getUserMedia error occurred: ${err}`);
 
         });
+        this.deleteRecording(); // clear the pinia store from previous sessions
     } else {
       console.log("getUserMedia not supported on your browser!");
     }

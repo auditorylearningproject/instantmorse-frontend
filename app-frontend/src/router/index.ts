@@ -1,12 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import RecordView from '@/views/RecordView.vue'
-import AudioPlayerVue from '@/views/AudioPlayer.vue'
 import StatisticsVue from '@/views/StatisticsView.vue'
+import SettingsView from '@/views/CWSettings.vue'
 import AuthenticationView from '@/views/AuthenticationView.vue'
 import RegistrationView from '@/views/RegistrationView.vue'
 import LessonViewVue from '@/views/LessonView.vue'
-import LessonSelect from '@/components/LessonSelect.vue'
+
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -30,43 +30,44 @@ const router = createRouter({
       path: '/record',
       name: 'record',
       meta: { layout: 'BlankLayout', pageTitle: "Recorder Widget"},
-      component: RecordView
+      component: () => import('../views/RecordView.vue')
     },
     {
-      path: '/lesson',
+      path: '/lesson/:lessonID',
       name: 'lesson-page',
       meta: { layout: 'BlankLayout', pageTitle: "Lesson Page"},
-      component: LessonViewVue
-    },
-    {
-      path: '/cw-widget',
-      name: 'playcw',
-      meta: { layout: 'BlankLayout'},
-      component: AudioPlayerVue
+      component: () => import('../views/LessonView.vue'),
+      props: true,
     },
     {
       path: '/authentication',
       name: 'Authentication',
       meta: {layout: 'BlankLayout', pageTitle: "Authentication Page"},
-      component: AuthenticationView
+      component: () => import('../views/AuthenticationView.vue')
     },
     {
       path: '/registration',
       name: 'Registration',
       meta: { layout: 'BlankLayout', pageTitle: "Registration Page" },
-      component: RegistrationView,
+      component: () => import('../views/RegistrationView.vue')
     },
     {
       path: '/lessonSelect',
       name: 'SelectLesson',
       meta: { layout: 'BlankLayout', pageTitle: "Select Lesson Page" },
-      component: LessonSelect
+      component: () => import('../views/LessonSelectView.vue')
     },
     {
       path: '/statistics',
       name: 'statistics',
       meta: { layout: 'BlankLayout', pageTitle: "User Statistics" },
-      component: StatisticsVue
+      component: () => import('../views/StatisticsView.vue')
+    },
+    {
+      path: '/settings',
+      name: 'cwsettings',
+      meta: { layout: 'BlankLayout', pageTitle: "CW Settings"},
+      component: () => import('../views/CWSettings.vue')
     },
     {
       path: '/:catchAll(.*)',

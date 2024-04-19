@@ -20,7 +20,7 @@
         <audio controls :src="recorderController.getAudioURL(clip.audio)"></audio>
         <p>{{ clip.name }}</p>
         <span v-if="clip.transcription">{{ clip.transcription }}</span>
-        <button @click="recorderController.deleteRecording(index)">Delete</button>
+        <button @click="recorderController.deleteRecording()">Delete</button>
         <button @click="transcriber.transcribe(index)">Transcribe</button>
       </article>
     </section>
