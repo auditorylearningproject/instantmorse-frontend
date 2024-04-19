@@ -1,5 +1,5 @@
 <template>
-    <p>{{playerMinString + ":" + playerSecString + " / " + playerMaxMinute.toFixed(0) + ":" + playerMaxSecTens.toFixed(0) + playerMaxSecOnes.toFixed(0)}}</p>
+    <p>{{playerMinString + ":" + playerSecString + " / " + playerMaxMinute?.toFixed(0) + ":" + playerMaxSecTens?.toFixed(0) + playerMaxSecOnes?.toFixed(0)}}</p>
 
     <div>
         <button @click="pause" type = "button" class="custom-button">Play/Pause</button>
