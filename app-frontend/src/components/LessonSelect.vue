@@ -142,10 +142,8 @@ div.v-select {
   --vs-dropdown-option--active-color: #eeeeee;
 }
 .container {
-    column-count: 2;
-    column-width: 30px;
-      /* column-gap: 0px; */
   column-rule: 4px solid rgb(79 185 227);
+  margin-left: 2rem;
 }
 h1 {
     grid-row: span;

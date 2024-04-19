@@ -1,15 +1,14 @@
 <template>
 <main>
+    <header>
+        Authentication Page
+    </header>
     <div class="authentication">
-        <header>
-            <h1>Authentication Page</h1>
-        </header>
         <form @submit.prevent="submitForm">
-            <label for="user">Username:</label><br>
-            <input v-model="userName"  id="user" type="text" placeholder="Username" required><br>
-            <label for="pass">Password:</label><br>
-            <input v-model="passWord" id="pass" type="password" placeholder="Password" required><br><br>
+            <input v-model="userName" class="user" id="user" type="text" placeholder="Username" required><br>
+            <input v-model="passWord" class="pass" id="pass" type="password" placeholder="Password" required><br><br>
             <button class="submit">Submit</button> <br><br>
+
         </form>
     </div>
     <div class="toRegistration">
@@ -70,13 +69,44 @@
 
 <style scoped>
 header {
-    height: 70px;
+    margin-bottom: 2rem;
     text-align: center;
+    font-size: x-large;
 }
 .authentication {
-    padding-left: 40%;
+    -ms-text-size-adjust: 2%;
+    border-color: black;
+    border: solid;
+    display: block;
+    text-align: center;
+    margin-bottom: 1rem;
+    max-width: 50rem;
+    margin-left: 30%;
+    margin-right: 30%;
 }
 .toRegistration {
-    padding-left: 40%;
+    border-color: black;
+    border: solid;
+    display: block;
+    text-align: center;
+    margin-bottom: 1rem;
+    max-width: 50rem;
+    margin-left: 30%;
+    margin-right: 30%;
+}
+.submit {
+    border-color: black;
+    border: solid;
+    text-align: center;
+    max-width: 50rem;
+    margin-left: 30%;
+    margin-right: 30%;
+    background-color: darkcyan;
+}
+.user, .pass {
+    margin-top: 1rem;
+    border-color: black;
+    border: solid;
+    border-width: .15rem;
 }
 </style>
