@@ -74,7 +74,6 @@ header {
     font-size: xx-large;
 }
 .authentication {
-    border-color: black;
     border: solid;
     display: block;
     text-align: center;
@@ -82,10 +81,11 @@ header {
     max-width: 50rem;
     margin-left: 40%;
     margin-right: 40%;
-    background-color: rgb(240, 240, 240);
+    background-color: #282c32;
+    border-radius: .3rem;
+    border-color: rgb(0, 0, 0);
 }
 .toRegistration {
-    border-color: black;
     border: solid;
     display: block;
     text-align: center;
@@ -93,22 +93,28 @@ header {
     max-width: 50rem;
     margin-left: 40%;
     margin-right: 40%;
-    background-color: rgb(240, 240, 240);
+    background-color: #282c32;
+    border-radius: .3rem;
+    color: #4680d1;;
+    border-color: rgb(0, 0, 0);
 }
 .submit {
-    border-color: black;
     border: solid;
     text-align: center;
     max-width: 50rem;
-    margin-left: 30%;
-    margin-right: 30%;
+    margin-left: 25%;
+    margin-right: 25%;
     background-color: #4680d1;
+    border-radius: .3rem;
+    border-width: .2cap;
 }
 .user, .pass {
     margin-top: 1rem;
-    border-color: black;
     border: solid;
     border-width: .15rem;
+    border-radius: .3rem;
+    border-color: rgb(61, 139, 248);
     background-color: #282c32;
+    color: rgb(255, 255, 255);
 }
 </style>
