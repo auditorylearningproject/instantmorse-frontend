@@ -1,15 +1,12 @@
 <template>
 <main>
-<header>Go Home or Select the Lesson You Would Like</header><br>
+<header>Select the Lesson You Would Like to Work On</header><br>
 <div class="container">
-    <div style="background: #282c32; color: white;  padding: 3rem; border-radius: 0.3rem">
-        <div class="goHome">
-            <form @submit.prevent='goToHome'>
-                <button class="homePage">Go to the Home Page</button> <br><br>
-            </form>
+    <div style="background: #282c32; color: white;  padding: 3rem; border-radius: 0.3rem; margin-left: 5rem">
+        <div class="lesson">
+            <label class="lessonLettering">Select a Lesson:</label>
         </div>
         <div class="lessonSelect">
-            <!-- <v-select :options="lessons" label="lesson_name" v-model="selectedItem" v-if="selectedItem"></v-select> -->
             <v-select :options="groups" label="groupName" v-model="groupSelected" v-if="groups"></v-select>
             <v-select v-else :options="['Please wait...']"></v-select>
         </div>
@@ -82,14 +79,6 @@
 
     let selectedItemThing = "";
     
-    const goToHome = async () => {
-        console.log("Ladies and Gentlemen, we got him");
-        try {
-            router.push('/');
-        } catch(error) {
-            console.error("Error switching to home page", error);
-        }
-    };
     const fetchData = async () => {
         console.log("Popping open a selection");
         try {
@@ -118,17 +107,14 @@ header {
     text-align: center;
     font-size: xx-large;
 }
-.goHome {
-    border-color: black;
-    border: solid;
-    text-align: center;
-    margin-right: 85%;
-    margin-bottom: 1rem;
+.lessonLettering {
+    color: rgb(79 185 227);
 }
 option.name {
     text-decoration-color: rgb(0, 0, 0);
 }
 div.v-select {
+    margin-top: 1%;
   --vs-controls-color: rgb(61, 139, 248);
   --vs-border-color: rgb(61, 139, 248);
 
@@ -146,13 +132,17 @@ div.v-select {
 }
 .container {
   column-rule: 4px solid rgb(79 185 227);
-  margin-left: 2rem;
 }
 .selectionMade {
     margin-top: 1rem;
-    border-color: black;
+    margin-bottom: 1rem;
     border: solid;
     text-align: center;
+    color: white;
+    border-color: black;
+    border-color: rgb(61, 139, 248);
     max-width: 50rem;
+    margin-right: 85%;
+    border-width: .18rem;
 }
 </style>
