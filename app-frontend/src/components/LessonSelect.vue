@@ -1,6 +1,6 @@
 <template>
 <main>
-<h1>Either Go Home or Select the Lesson You Would Like</h1><br>
+<header>Go Home or Select the Lesson You Would Like</header><br>
 <div class="container">
     <div style="background: #282c32; color: white;  padding: 3rem; border-radius: 0.3rem">
         <div class="goHome">
@@ -80,9 +80,6 @@
     })
     const groups: Ref<Array<Groups>> = ref([])
 
-
-
-
     let selectedItemThing = "";
     
     const goToHome = async () => {
@@ -118,10 +115,16 @@
 
 <style scoped>
 header {
-    height: 70px;
     text-align: center;
+    font-size: xx-large;
 }
-
+.goHome {
+    border-color: black;
+    border: solid;
+    text-align: center;
+    margin-right: 85%;
+    margin-bottom: 1rem;
+}
 option.name {
     text-decoration-color: rgb(0, 0, 0);
 }
@@ -145,10 +148,11 @@ div.v-select {
   column-rule: 4px solid rgb(79 185 227);
   margin-left: 2rem;
 }
-h1 {
-    grid-row: span;
-    row-gap: 30px;
-    margin: 0;
-    padding: 0;
+.selectionMade {
+    margin-top: 1rem;
+    border-color: black;
+    border: solid;
+    text-align: center;
+    max-width: 50rem;
 }
 </style>

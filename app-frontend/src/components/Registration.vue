@@ -1,17 +1,17 @@
 <template>
-    <div class="registration">
+    <main>
         <header>
-            <h1>Registration Page</h1>
+            Registration Page
         </header>
-        <form @submit.prevent="register">
-            <label for="user">Username:</label><br>
-            <input v-model="userName"  id="user" type="text" placeholder="Username" required><br>
-            <label for="pass">Password:</label><br>
-            <input v-model="passWord" id="pass" type="text" placeholder="Password" required><br><br>
-            <button class="submit">Submit</button> <br><br>
-            <p>{{ exceptionText }}</p>
-        </form>
-    </div>
+        <div class="registration">
+            <form @submit.prevent="register">
+                <input v-model="userName" class="user" id="user" type="text" placeholder="Username" required><br>
+                <input v-model="passWord" class="pass" id="pass" type="text" placeholder="Password" required><br><br>
+                <button class="submit">Submit</button> <br><br>
+                <p>{{ exceptionText }}</p>
+            </form>
+        </div>
+    </main>
 </template>
 
 <script lang="ts">
@@ -55,18 +55,36 @@ import { ref } from 'vue';
         },
     };
 </script>
-
 <style scoped>
 header {
     height: 70px;
     text-align: center;
 }
-
-.registration {
-    padding-left: 40%;
+header {
+    text-align: center;
+    font-size: xx-large;
 }
-
+.registration {
+    border-color: black;
+    border: solid;
+    display: block;
+    text-align: center;
+    margin-bottom: 1rem;
+    max-width: 50rem;
+    margin-left: 40%;
+    margin-right: 40%;
+}
 .submit {
-    color: #000000;
+    border-color: black;
+    border: solid;
+    text-align: center;
+    max-width: 50rem;
+    background-color: #4680d1;
+}
+.user, .pass {
+    margin-top: 1rem;
+    border-color: black;
+    border: solid;
+    border-width: .15rem;
 }
 </style>
