@@ -37,33 +37,39 @@ const groupedAttempts = computed(() => {
     <NavigationHeader/>
   </header>
   <main>
-  <table>
-    <thead>
-      <tr>
-        <th>Lesson Name</th>
-        <th>Character Speed</th>
-        <th>Effective Speed</th>
-        <th>Accuracy</th>
-        <th>Time Spent (seconds)</th>
-        <th>Date & Time</th>
-      </tr>
-    </thead>
-    <tbody>
-      <template v-for="attemptGroup in groupedAttempts" :key="attemptGroup.lesson_id">
-        <tr v-for="attempt in attemptGroup" :key="attempt.date_time.toString()">
-          <td>{{ attemptGroup[0].lesson_name }}</td>
-          <td>{{ attempt.char_speed }}</td>
-          <td>{{ attempt.eff_speed }}</td>
-          <td>{{ attempt.accuracy }}</td>
-          <td>{{ attempt.time_spent/1000 }}</td>
-          <td>{{ attempt.date_time }}</td>
-        </tr>
-      </template>
-    </tbody>
-  </table>
+    <div class="table">
+      <table>
+        <thead>
+          <tr>
+            <th>Lesson Name</th>
+            <th>Character Speed</th>
+            <th>Effective Speed</th>
+            <th>Accuracy</th>
+            <th>Time Spent (seconds)</th>
+            <th>Date & Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          <template v-for="attemptGroup in groupedAttempts" :key="attemptGroup.lesson_id">
+            <tr v-for="attempt in attemptGroup" :key="attempt.date_time.toString()">
+              <td>{{ attemptGroup[0].lesson_name }}</td>
+              <td>{{ attempt.char_speed }}</td>
+              <td>{{ attempt.eff_speed }}</td>
+              <td>{{ attempt.accuracy }}</td>
+              <td>{{ attempt.time_spent/1000 }}</td>
+              <td>{{ attempt.date_time }}</td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+    </div>
   </main>
 </template>
-  <style scoped>
-    /* Optional styling for the table */
-  </style>
+<style scoped>
+  .table {
+    border: solid;
+    border-width: .4cap;
+    border-color: #4680d1;;
+  }
+</style>
   
