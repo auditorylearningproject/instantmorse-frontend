@@ -252,7 +252,7 @@ function hasSentences(obj: LessonDto): boolean {
             recorderController.stopRecording();
           }
         }finally{
-
+          alreadyPlayed.value = false;
           voiceStatus.value = "Play the audio to begin recording."
           waitingPeriod.value = false;
 
@@ -354,16 +354,18 @@ function hasSentences(obj: LessonDto): boolean {
   })
 
   async function cwStoppedPlaying(){
-    if(currentLetter.value !== currentLetterAtEndOfPlay){
+    if(!alreadyPlayed.value){
       recorderController.beginRecording();
-      currentLetterAtEndOfPlay = currentLetter.value; //preventing user from calling startRecording after pressing play again on same letter
+      //currentLetterAtEndOfPlay = currentLetter.value; //preventing user from calling startRecording after pressing play again on same letter
+      alreadyPlayed.value = true;
       voiceStatus.value = "Speak now!";
     }
     console.log("Audio stopped! Recording begun.")
 
   }
 
-  let currentLetterAtEndOfPlay: string | undefined;
+  //let currentLetterAtEndOfPlay: string | undefined;
+  const alreadyPlayed = ref(false);
 
   watch(micSensitivity, async (newValue) => {
     recorderController.micSensitivity = 0.01 - newValue;  //inverted to make the slider go more sensitive when moved to the right
