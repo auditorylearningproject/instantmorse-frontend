@@ -38,8 +38,12 @@ if(response && response.data['username']){
   <main>
     <img alt="InstantMorse logo" class="logo" src="@/assets/morse-code.png" width="125" height="125" />
    
-   <div class="greetings"> <h1 class="green"> InstantMorse.Codes - Learn Morse Code by Speaking!</h1> </div>
-    <TheWelcome />
+    <div class="greetings"> <h1 class="green"> InstantMorse.Codes - Learn Morse Code by Speaking!</h1></div>
+    <div class="explanations"> <h3>This project was inspired by Dr. Rogers and his interests in LCWO and learning morse code in new ways.
+      This website was a reimplementation to the work already done by a Benedictine College Graduate, who used MathLab to code a similar project.
+      Although there are already websites that help individuals learn Morse Code, our website is different in that it trains the individual by voice
+      instead of by typing characters or words.
+    </h3></div><br>
     <p style="text-align: center; margin: auto; font-size: 2rem;"> {{ currentStatus }}</p>
   </main>
 </template>
@@ -104,7 +108,7 @@ nav a.router-link-exact-active {
     display: block;
     margin: 2rem auto 2rem;
       /*margin: 0 2rem 0 0;*/
-    filter: invert(100%) brightness(98%) contrast(102%);
+    filter: invert(50%) brightness(98%) contrast(102%);
   }
 
 h1 {
@@ -151,6 +155,16 @@ a,
   a:hover {
     background-color: hsla(160, 100%, 37%, 0.2);
   }
+}
+
+.explanations h3 {
+  border: solid;
+  border-width: .4vb;
+  border-color: #4680d1;
+  text-align: center;
+  border-radius: 10%;
+  margin-left: 30%;
+  margin-right: 30%;
 }
 
 /* @media (min-width: 1024px) {

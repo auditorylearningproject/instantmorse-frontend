@@ -3,11 +3,8 @@
 <header>Select the Lesson You Would Like to Work On</header><br>
 <div class="container">
     <div style="background: #282c32; color: white;  padding: 3rem; border-radius: 0.3rem; margin-left: 5rem">
-        <div class="lesson">
-            <label class="lessonLettering">Select a Lesson:</label>
-        </div>
         <div class="lessonSelect">
-            <v-select :options="groups" label="groupName" v-model="groupSelected" v-if="groups"></v-select>
+            <v-select :options="groups" label="groupName" v-model="groupSelected" v-if="groups" placeholder="Select a Lesson"></v-select>
             <v-select v-else :options="['Please wait...']"></v-select>
         </div>
         <div v-if="groupSelected">
