@@ -16,20 +16,18 @@ onMounted(async () => {
 });
 const attempts = ref<Array<AttemptDto& { lesson_name: string }>>([]);
 const groupedAttempts = computed(() => {
-      const grouped = attempts.value.reduce((acc, attempt) => {
-        const lessonId = attempt.lesson_id.toString(); // Convert ObjectId to string
-        if (!acc[lessonId]) {
-          acc[lessonId] = [];
-        }
-        acc[lessonId].push(attempt);
-        return acc;
-      }, {} as { [key: string]: Array<AttemptDto& { lesson_name: string }> });
-      return grouped;
-    });
+  const grouped = attempts.value.reduce((acc, attempt) => {
+    const lessonId = attempt.lesson_id.toString(); // Convert ObjectId to string
+    if (!acc[lessonId]) {
+      acc[lessonId] = [];
+    }
+    acc[lessonId].push(attempt);
+    return acc;
+  }, {} as { [key: string]: Array<AttemptDto& { lesson_name: string }> });
+  return grouped;
+});
 // return Object.values(groups);
 // });
-  
-
 </script>
 
 <template>
@@ -37,39 +35,61 @@ const groupedAttempts = computed(() => {
     <NavigationHeader/>
   </header>
   <main>
-    <div class="table">
-      <table>
+    <div class="head">
+      <header>
+        Your Statistics
+      </header>
+    </div>
+      <table class="table">
         <thead>
           <tr>
-            <th>Lesson Name</th>
-            <th>Character Speed</th>
-            <th>Effective Speed</th>
-            <th>Accuracy</th>
-            <th>Time Spent (seconds)</th>
-            <th>Date & Time</th>
+            <th class="columnHeader">Lesson Name</th>
+            <th class="columnHeader">Character Speed</th>
+            <th class="columnHeader">Effective Speed</th>
+            <th class="columnHeader">Accuracy</th>
+            <th class="columnHeader">Time Spent (seconds)</th>
+            <th class="columnHeader">Date & Time</th>
           </tr>
         </thead>
         <tbody>
           <template v-for="attemptGroup in groupedAttempts" :key="attemptGroup.lesson_id">
-            <tr v-for="attempt in attemptGroup" :key="attempt.date_time.toString()">
-              <td>{{ attemptGroup[0].lesson_name }}</td>
-              <td>{{ attempt.char_speed }}</td>
-              <td>{{ attempt.eff_speed }}</td>
-              <td>{{ attempt.accuracy }}</td>
-              <td>{{ attempt.time_spent/1000 }}</td>
-              <td>{{ attempt.date_time }}</td>
+            <tr class="rows" v-for="attempt in attemptGroup" :key="attempt.date_time.toString()">
+              <td class="columns">{{ attemptGroup[0].lesson_name }}</td>
+              <td class="columns">{{ attempt.char_speed }}</td>
+              <td class="columns">{{ attempt.eff_speed }}</td>
+              <td class="columns">{{ attempt.accuracy }}</td>
+              <td class="columns">{{ attempt.time_spent/1000 }}</td>
+              <td class="columns">{{ attempt.date_time }}</td>
             </tr>
           </template>
         </tbody>
       </table>
-    </div>
   </main>
 </template>
 <style scoped>
   .table {
     border: solid;
     border-width: .4cap;
-    border-color: #4680d1;;
+    border-color: black;
+    margin-left: 20%;
+    margin-right: 20%;
+  }
+  .columnHeader {
+    border: solid;
+    border-color: black;
+  }
+  .rows {
+    border: solid;
+    border-color: #4680d1;
+  }
+  .columns {
+    border: solid;
+    border-color: #4680d1;
+  }
+  .head {
+    margin-bottom: 2rem;
+    text-align: center;
+    font-size: xx-large;
   }
 </style>
   

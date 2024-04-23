@@ -11,6 +11,11 @@
                 <p>{{ exceptionText }}</p>
             </form>
         </div>
+        <div class="toAuthentication">
+            <form @submit.prevent="linkToAuthenticate">
+                <button class="authenticate">Already a User? Click Here!</button>
+            </form>
+        </div>
     </main>
 </template>
 
@@ -50,7 +55,15 @@ import { ref } from 'vue';
                         } else {
                         this.exceptionText = `${err} (If error 409, an account with that name already exists!)`;
                         }
-                    }
+                }
+            },
+            async linkToAuthenticate() {
+                console.log("Authentication was clicked. Rerouting to the Authentication Page");
+                try {
+                    this.$router.push('/authentication');
+                } catch(error) {
+                    console.error("Error switching to authentication page", error);
+                }
             },
         },
     };
@@ -71,6 +84,19 @@ header {
     margin-right: 40%;
     background-color: #282c32;
     border-radius: .3rem;
+    border-color: rgb(0, 0, 0);
+}
+.toAuthentication {
+    border: solid;
+    display: block;
+    text-align: center;
+    margin-bottom: 1rem;
+    max-width: 50rem;
+    margin-left: 40%;
+    margin-right: 40%;
+    background-color: #282c32;
+    border-radius: .3rem;
+    color: #4680d1;;
     border-color: rgb(0, 0, 0);
 }
 .submit {

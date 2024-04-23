@@ -424,28 +424,27 @@ const cwDefaults = ref<CWSettings>({
       showStatistics.value = false; // stop the user from trying to save many times
 
       const attempt: AttemptDto = {
-                    lesson_id: props.lessonID as string,
-                    char_speed: cwSettings.getWPM,
-                    eff_speed: cwSettings.getEFF,
-                    accuracy: averageAccuracy.value,
-                    time_spent: totalTimeToAnswer.value, //seconds
-                    date_time: new Date()
-                  }
-                  const baseUrl: string = window.location.origin;
-                  const response: AxiosResponse = await axios.post(
-                    baseUrl + '/api/attempt',
-                    attempt
-                  );
-                  if (response.status == HttpStatusCode.Created){
-                    currentState.value = "Attempt saved to database!";
-                  }else if(response.status == HttpStatusCode.Unauthorized){
-                    currentState.value = "ERROR: You weren't logged in when the lesson started. Not saved.";
-                  }
-                  else{
-                    throw new Error('Error in transcription request... app is shutting down.');
-                  }
+          lesson_id: props.lessonID as string,
+          char_speed: cwSettings.getWPM,
+          eff_speed: cwSettings.getEFF,
+          accuracy: averageAccuracy.value,
+          time_spent: totalTimeToAnswer.value, //seconds
+          date_time: new Date()
+        }
+        const baseUrl: string = window.location.origin;
+        const response: AxiosResponse = await axios.post(
+          baseUrl + '/api/attempt',
+          attempt
+        );
+        if (response.status == HttpStatusCode.Created){
+          currentState.value = "Attempt saved to database!";
+        }else if(response.status == HttpStatusCode.Unauthorized){
+          currentState.value = "ERROR: You weren't logged in when the lesson started. Not saved.";
+        }
+        else{
+          throw new Error('Error in transcription request... app is shutting down.');
+        }
     }
-
 </script>
 
 <template>
@@ -505,11 +504,10 @@ const cwDefaults = ref<CWSettings>({
 
 <style scoped>
 
-header {
+  header {
     text-align: center;
     margin-bottom: 20px;
   }
-
   main {
     display: flex;
     flex-direction: column;
@@ -517,20 +515,16 @@ header {
     justify-content: center;
     /* height: 50vh; Adjust as needed */
   }
-
   h1, h2 {
     text-align: center;
   }
-
   #voicestatus,
   #currentstate {
     text-align: center;
   }
-
   #mic-sensitivity {
     margin-top: 10px;
   }
-
   .sidebar {
     position: absolute;
     right: 10%;
@@ -539,17 +533,14 @@ header {
     overflow-y: auto;
     max-height: calc(100vh - 100px); /* Adjust as needed */
   }
-
   .sidebar ul {
     list-style: none;
     padding: 0;
     margin: 0;
   }
-
   .sidebar li {
     margin-bottom: 5px;
   }
-
   /* Styling for AudioPlayer component (assuming it's a separate component) */
   .audio-player-container {
     display: flex;
@@ -557,7 +548,6 @@ header {
     align-items: center;
     margin-top: 20px; /* Adjust as needed */
   }
-
   /* Additional styling for AudioPlayer component elements if needed */
   .audio-player-controls {
     /* Your styles here */
@@ -577,12 +567,10 @@ header {
   #currentstate {
     font-size: 2em;
   }
-
   .lesson-info-container {
   overflow-y: auto;
   padding: 0 20px; /* Add padding as needed */
   text-align: center;
 }
-
 </style>
   
