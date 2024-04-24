@@ -528,7 +528,7 @@ const cwDefaults = ref<CWSettings>({
   }
   .sidebar {
     position: absolute;
-    right: 25%;
+    right: 20%;
     top: 50%;
     transform: translateY(-50%);
     overflow-y: auto;
@@ -539,10 +539,11 @@ const cwDefaults = ref<CWSettings>({
   .sidebar ul {
     list-style: none;
     padding: 0;
-    margin: 0;
   }
   .sidebar li {
-    margin-bottom: 5px;
+    margin-bottom: 10px;
+    margin-left: 50px;
+    margin-right: 50px;
   }
   .custom-button {
     margin-right: 10px; /* Adjust as needed */
@@ -589,8 +590,8 @@ const cwDefaults = ref<CWSettings>({
     border: solid;
     background-color: rgb(40, 44, 50);
     -webkit-text-fill-color: #4680d1;
-    margin-left: 18%;
-    margin-right: 18%;
+    margin-left: 10%;
+    margin-right: 10%;
   }
   .results {
 
