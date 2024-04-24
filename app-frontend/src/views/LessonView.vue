@@ -252,7 +252,7 @@ function hasSentences(obj: LessonDto): boolean {
             recorderController.stopRecording();
           }
         }finally{
-
+          alreadyPlayed.value = false;
           voiceStatus.value = "Play the audio to begin recording."
           waitingPeriod.value = false;
 
@@ -354,16 +354,18 @@ function hasSentences(obj: LessonDto): boolean {
   })
 
   async function cwStoppedPlaying(){
-    if(currentLetter.value !== currentLetterAtEndOfPlay){
+    if(!alreadyPlayed.value){
       recorderController.beginRecording();
-      currentLetterAtEndOfPlay = currentLetter.value; //preventing user from calling startRecording after pressing play again on same letter
+      //currentLetterAtEndOfPlay = currentLetter.value; //preventing user from calling startRecording after pressing play again on same letter
+      alreadyPlayed.value = true;
       voiceStatus.value = "Speak now!";
     }
     console.log("Audio stopped! Recording begun.")
 
   }
 
-  let currentLetterAtEndOfPlay: string | undefined;
+  //let currentLetterAtEndOfPlay: string | undefined;
+  const alreadyPlayed = ref(false);
 
   watch(micSensitivity, async (newValue) => {
     recorderController.micSensitivity = 0.01 - newValue;  //inverted to make the slider go more sensitive when moved to the right
@@ -422,28 +424,27 @@ const cwDefaults = ref<CWSettings>({
       showStatistics.value = false; // stop the user from trying to save many times
 
       const attempt: AttemptDto = {
-                    lesson_id: props.lessonID as string,
-                    char_speed: cwSettings.getWPM,
-                    eff_speed: cwSettings.getEFF,
-                    accuracy: averageAccuracy.value,
-                    time_spent: totalTimeToAnswer.value, //seconds
-                    date_time: new Date()
-                  }
-                  const baseUrl: string = window.location.origin;
-                  const response: AxiosResponse = await axios.post(
-                    baseUrl + '/api/attempt',
-                    attempt
-                  );
-                  if (response.status == HttpStatusCode.Created){
-                    currentState.value = "Attempt saved to database!";
-                  }else if(response.status == HttpStatusCode.Unauthorized){
-                    currentState.value = "ERROR: You weren't logged in when the lesson started. Not saved.";
-                  }
-                  else{
-                    throw new Error('Error in transcription request... app is shutting down.');
-                  }
+          lesson_id: props.lessonID as string,
+          char_speed: cwSettings.getWPM,
+          eff_speed: cwSettings.getEFF,
+          accuracy: averageAccuracy.value,
+          time_spent: totalTimeToAnswer.value, //seconds
+          date_time: new Date()
+        }
+        const baseUrl: string = window.location.origin;
+        const response: AxiosResponse = await axios.post(
+          baseUrl + '/api/attempt',
+          attempt
+        );
+        if (response.status == HttpStatusCode.Created){
+          currentState.value = "Attempt saved to database!";
+        }else if(response.status == HttpStatusCode.Unauthorized){
+          currentState.value = "ERROR: You weren't logged in when the lesson started. Not saved.";
+        }
+        else{
+          throw new Error('Error in transcription request... app is shutting down.');
+        }
     }
-
 </script>
 
 <template>
@@ -459,13 +460,15 @@ const cwDefaults = ref<CWSettings>({
       <p id="currentstate">{{ currentState }}</p>  
 
       <!-- <p id="currentletter">{{ currentLetter }}</p> -->
-      <div id="micAdjust">Adjust microphone sensitivity: <input v-model="micSensitivity" type="range" min="0.001" max="0.010" step="0.001" id="mic-sensitivity"></div>
-      <div v-if="!currentLetter">Loading lesson text...</div>
-      <div v-else>
-        <AudioPlayer @playbackFinished="cwStoppedPlaying" :current-text="currentLetter" v-if="hasSettings"></AudioPlayer>
+      <div class="player">
+        <div id="micAdjust">Adjust microphone sensitivity: <input v-model="micSensitivity" type="range" min="0.001" max="0.010" step="0.001" id="mic-sensitivity"></div>
+        <div v-if="!currentLetter">Loading lesson text...</div>
+        <div v-else>
+          <AudioPlayer @playbackFinished="cwStoppedPlaying" :current-text="currentLetter" v-if="hasSettings"></AudioPlayer>
+        </div>
       </div>
 
-      <button id="saveStats" v-show="showStatistics" @click="saveStatistics">Save Statistics</button>
+      <button id="saveStats" class="custom-button" v-show="showStatistics" @click="saveStatistics">Save Statistics</button>
 
       <div v-if="showStatistics">
         <h2>Lesson Statistics:</h2>
@@ -478,9 +481,9 @@ const cwDefaults = ref<CWSettings>({
         <p>Total time to answer: {{ totalTimeToAnswer/1000 }}</p>
       </div>
     </div>
-      <div class="sidebar">
+    <div class="sidebar">
       <ul>
-        
+        <label>Results:</label>
         <li v-for="(item, index) in sidebarLettersBesidesCurrent" :key="index">
             <button v-if="lessonStatistics[index]" @click="lessonStatistics[index].accuracy = !lessonStatistics[index].accuracy">
               {{ item }}
@@ -502,12 +505,10 @@ const cwDefaults = ref<CWSettings>({
   </template>
 
 <style scoped>
-
-header {
+  header {
     text-align: center;
     margin-bottom: 20px;
   }
-
   main {
     display: flex;
     flex-direction: column;
@@ -515,39 +516,45 @@ header {
     justify-content: center;
     /* height: 50vh; Adjust as needed */
   }
-
   h1, h2 {
     text-align: center;
   }
-
   #voicestatus,
   #currentstate {
     text-align: center;
   }
-
   #mic-sensitivity {
     margin-top: 10px;
   }
-
   .sidebar {
     position: absolute;
-    right: 10%;
+    right: 20%;
     top: 50%;
     transform: translateY(-50%);
     overflow-y: auto;
-    max-height: calc(100vh - 100px); /* Adjust as needed */
+    max-height: calc(100vh - 100px); /*Adjust as needed*/
+    border: solid;
+    border-width: .1rem;
   }
-
   .sidebar ul {
     list-style: none;
     padding: 0;
-    margin: 0;
   }
-
   .sidebar li {
-    margin-bottom: 5px;
+    margin-bottom: 10px;
+    margin-left: 50px;
+    margin-right: 50px;
   }
-
+  .custom-button {
+    margin-right: 10px; /* Adjust as needed */
+    border: solid;
+    border-width: .18rem;
+    border-color: black;
+    background-color: #4680d1;
+    -webkit-text-fill-color: black;
+    margin-top: .18rem;
+    text-align: center;
+  }
   /* Styling for AudioPlayer component (assuming it's a separate component) */
   .audio-player-container {
     display: flex;
@@ -555,7 +562,6 @@ header {
     align-items: center;
     margin-top: 20px; /* Adjust as needed */
   }
-
   /* Additional styling for AudioPlayer component elements if needed */
   .audio-player-controls {
     /* Your styles here */
@@ -575,12 +581,20 @@ header {
   #currentstate {
     font-size: 2em;
   }
-
   .lesson-info-container {
   overflow-y: auto;
   padding: 0 20px; /* Add padding as needed */
   text-align: center;
-}
+  }
+  .player {
+    border: solid;
+    background-color: rgb(40, 44, 50);
+    -webkit-text-fill-color: #4680d1;
+    margin-left: 10%;
+    margin-right: 10%;
+  }
+  .results {
 
+  }
 </style>
   

@@ -1,16 +1,10 @@
 <template>
 <main>
-<h1>Either Go Home or Select the Lesson You Would Like</h1><br>
+<header>Select the Lesson You Would Like to Work On</header><br>
 <div class="container">
-    <div style="background: #282c32; color: white;  padding: 3rem; border-radius: 0.3rem">
-        <div class="goHome">
-            <form @submit.prevent='goToHome'>
-                <button class="homePage">Go to the Home Page</button> <br><br>
-            </form>
-        </div>
+    <div style="background: #282c32; color: white;  padding: 3rem; border-radius: 0.3rem; margin-left: 5rem">
         <div class="lessonSelect">
-            <!-- <v-select :options="lessons" label="lesson_name" v-model="selectedItem" v-if="selectedItem"></v-select> -->
-            <v-select :options="groups" label="groupName" v-model="groupSelected" v-if="groups"></v-select>
+            <v-select :options="groups" label="groupName" v-model="groupSelected" v-if="groups" placeholder="Select a Lesson"></v-select>
             <v-select v-else :options="['Please wait...']"></v-select>
         </div>
         <div v-if="groupSelected">
@@ -80,19 +74,8 @@
     })
     const groups: Ref<Array<Groups>> = ref([])
 
-
-
-
     let selectedItemThing = "";
     
-    const goToHome = async () => {
-        console.log("Ladies and Gentlemen, we got him");
-        try {
-            router.push('/');
-        } catch(error) {
-            console.error("Error switching to home page", error);
-        }
-    };
     const fetchData = async () => {
         console.log("Popping open a selection");
         try {
@@ -118,14 +101,17 @@
 
 <style scoped>
 header {
-    height: 70px;
     text-align: center;
+    font-size: xx-large;
 }
-
+.lessonLettering {
+    color: rgb(79 185 227);
+}
 option.name {
     text-decoration-color: rgb(0, 0, 0);
 }
 div.v-select {
+    margin-top: 1%;
   --vs-controls-color: rgb(61, 139, 248);
   --vs-border-color: rgb(61, 139, 248);
 
@@ -143,12 +129,17 @@ div.v-select {
 }
 .container {
   column-rule: 4px solid rgb(79 185 227);
-  margin-left: 2rem;
 }
-h1 {
-    grid-row: span;
-    row-gap: 30px;
-    margin: 0;
-    padding: 0;
+.selectionMade {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    border: solid;
+    text-align: center;
+    color: white;
+    border-color: black;
+    border-color: rgb(61, 139, 248);
+    max-width: 50rem;
+    margin-right: 85%;
+    border-width: .18rem;
 }
 </style>

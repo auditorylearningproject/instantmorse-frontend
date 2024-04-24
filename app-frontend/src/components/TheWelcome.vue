@@ -21,14 +21,14 @@ import SupportIcon from './icons/IconSupport.vue'
       <ToolingIcon />
     </template>
     Calvin -->
-    Calvin
+    Calvin Farrell
   </WelcomeItem>
 
   <WelcomeItem>
     <!-- <template #icon>
       <EcosystemIcon />
     </template> -->
-    David
+    David Garstecki
   </WelcomeItem>
 
   <WelcomeItem>
@@ -36,10 +36,10 @@ import SupportIcon from './icons/IconSupport.vue'
       <CommunityIcon />
     </template> -->
 
-    Kento
+    Kento Nishimoto
   </WelcomeItem>
 
   <WelcomeItem>
-    Luke
+    Luke Aschenbrenner
   </WelcomeItem>
 </template>

@@ -1,27 +1,24 @@
 <template>
-    <header>
-
+  <header>
     <div class="wrapper">
-
       <nav class="flex items-center justify-between bg-gray-800 p-4">
-
-      <div class="flex items-center">
-      <RouterLink to="/" class="text-white hover:text-gray-300 mr-4">Home</RouterLink>
-      <RouterLink to="/authentication" v-show="!loggedIn" class="text-white hover:text-gray-300 mr-4">Login</RouterLink>
-      <RouterLink to="/registration" v-show="!loggedIn" class="text-white hover:text-gray-300 mr-4">Register</RouterLink>
-      <RouterLink to="/lessonSelect" class="text-white hover:text-gray-300 mr-4">Select Lesson</RouterLink>
-      <RouterLink to="/statistics" class="text-white hover:text-gray-300 mr-4">User Statistics</RouterLink>
-      <RouterLink to="/settings" class="text-white hover:text-gray-300 mr-4">Settings</RouterLink>
-    </div>
-
-    
-    <button v-show="loggedIn" @click="logout" class="text-white hover:text-gray-300 px-4">Logout</button> <!-- @click=""  -->
-  </nav>
+        <div class="flex items-center">
+          <RouterLink to="/" class="text-white hover:text-gray-300 mr-4">Home</RouterLink>
+          <RouterLink to="/lessonSelect" class="text-white hover:text-gray-300 mr-4">Select Lesson</RouterLink>
+          <RouterLink to="/statistics" class="text-white hover:text-gray-300 mr-4">User Statistics</RouterLink>
+          <RouterLink to="/settings" class="text-white hover:text-gray-300 mr-4">Settings</RouterLink>
+        </div>
+        <div class="flex items-right">
+          <RouterLink to="/authentication" v-show="!loggedIn" class="text-white hover:text-gray-300 px-4">Login</RouterLink>
+          <RouterLink to="/registration" v-show="!loggedIn" class="text-white hover:text-gray-300 px-1">Register</RouterLink>
+          <button v-show="loggedIn" @click="logout" class="text-white hover:text-gray-300 px-4">Logout</button> <!-- @click=""  -->
+        </div>
+      </nav>
     </div>
   </header>
-  </template>
+</template>
 
-  <script setup lang="ts">
+<script setup lang="ts">
 import axios from 'axios';
 import { ref, onMounted, getCurrentInstance, type ComponentInternalInstance } from 'vue';
 import { useRouter } from 'vue-router';
@@ -61,7 +58,9 @@ function logout(){
   router.go(0);
   router.push({path: "/", force: true});
   instance!.proxy!.$forceUpdate();
-
 }
-
 </script>
+
+<style scoped>
+  
+</style>
