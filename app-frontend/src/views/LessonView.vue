@@ -468,7 +468,7 @@ const cwDefaults = ref<CWSettings>({
         </div>
       </div>
 
-      <button id="saveStats" v-show="showStatistics" @click="saveStatistics">Save Statistics</button>
+      <button id="saveStats" class="custom-button" v-show="showStatistics" @click="saveStatistics">Save Statistics</button>
 
       <div v-if="showStatistics">
         <h2>Lesson Statistics:</h2>
@@ -481,9 +481,9 @@ const cwDefaults = ref<CWSettings>({
         <p>Total time to answer: {{ totalTimeToAnswer/1000 }}</p>
       </div>
     </div>
-      <div class="sidebar">
+    <div class="sidebar">
       <ul>
-        
+        <label>Results:</label>
         <li v-for="(item, index) in sidebarLettersBesidesCurrent" :key="index">
             <button v-if="lessonStatistics[index]" @click="lessonStatistics[index].accuracy = !lessonStatistics[index].accuracy">
               {{ item }}
@@ -505,7 +505,6 @@ const cwDefaults = ref<CWSettings>({
   </template>
 
 <style scoped>
-
   header {
     text-align: center;
     margin-bottom: 20px;
@@ -529,11 +528,13 @@ const cwDefaults = ref<CWSettings>({
   }
   .sidebar {
     position: absolute;
-    right: 10%;
+    right: 25%;
     top: 50%;
     transform: translateY(-50%);
     overflow-y: auto;
-    max-height: calc(100vh - 100px); /* Adjust as needed */
+    max-height: calc(100vh - 100px); /*Adjust as needed*/
+    border: solid;
+    border-width: .1rem;
   }
   .sidebar ul {
     list-style: none;
@@ -542,6 +543,16 @@ const cwDefaults = ref<CWSettings>({
   }
   .sidebar li {
     margin-bottom: 5px;
+  }
+  .custom-button {
+    margin-right: 10px; /* Adjust as needed */
+    border: solid;
+    border-width: .18rem;
+    border-color: black;
+    background-color: #4680d1;
+    -webkit-text-fill-color: black;
+    margin-top: .18rem;
+    text-align: center;
   }
   /* Styling for AudioPlayer component (assuming it's a separate component) */
   .audio-player-container {
@@ -577,7 +588,12 @@ const cwDefaults = ref<CWSettings>({
   .player {
     border: solid;
     background-color: rgb(40, 44, 50);
-    -webkit-text-fill-color: white;
+    -webkit-text-fill-color: #4680d1;
+    margin-left: 18%;
+    margin-right: 18%;
+  }
+  .results {
+
   }
 </style>
   

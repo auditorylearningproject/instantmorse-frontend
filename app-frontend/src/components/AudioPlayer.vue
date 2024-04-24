@@ -2,8 +2,8 @@
     <p>{{playerMinString + ":" + playerSecString + " / " + playerMaxMinute?.toFixed(0) + ":" + playerMaxSecTens?.toFixed(0) + playerMaxSecOnes?.toFixed(0)}}</p>
 
     <div>
-        <button @click="pause" type = "button" class="custom-button">Play/Pause</button>
-        <button @click="stop" type = "button" class="custom-button">Stop</button>
+        <button @click="pause" type="button" class="custom-button">Play/Pause</button>
+        <button @click="stop" type="button" class="custom-button">Stop</button>
         <Panel header="Settings" class="settings" toggleable collapsed>
             <!-- <p>This is a standin for the Settings Panel</p> -->
             <div class="settingChoice">
@@ -12,15 +12,15 @@
             </div>
             <div class="settingChoice">
                 <h2>Effective Word Speed</h2>
-                <InputNumber v-model="updateEFF" inputId="minmax-buttons" mode="decimal" showButtons suffix="WPM" :min="0" :max="updateWPM" />
+                <InputNumber v-model="updateEFF" class="settingItself" inputId="minmax-buttons" mode="decimal" showButtons suffix="WPM" :min="0" :max="updateWPM" />
             </div>
             <div class="settingChoice">
                 <h2>Extra Word Space</h2>
-                <InputNumber v-model="updateEWS" inputId="minmax-buttons" mode="decimal" showButtons suffix="x" :min="0" :max="5" />
+                <InputNumber v-model="updateEWS" class="settingItself" inputId="minmax-buttons" mode="decimal" showButtons suffix="x" :min="0" :max="5" />
             </div>
             <div class="settingChoice">
                 <h2>Frequency</h2>
-                <InputNumber v-model="updateFreq" inputId="minmax-buttons" mode="decimal" showButtons suffix="Hz" :min="300" :max="1500" />
+                <InputNumber v-model="updateFreq" class="settingItself" inputId="minmax-buttons" mode="decimal" showButtons suffix="Hz" :min="300" :max="1500" />
             </div>
             <div style="white-space: pre-line"></div>
             <button @click="updateSettings" class="settingButtons" type="submit">Save Setttings</button>
@@ -189,6 +189,8 @@ import { update } from "lodash-es";
         border-width: .18rem;
         border-color: black;
         background-color: #4680d1;
+        -webkit-text-fill-color: black;
+        margin-top: .5rem;
     }
     .settings {
         margin-top: 1rem;
@@ -199,13 +201,15 @@ import { update } from "lodash-es";
         border-bottom-width: 0rem;
         border-color: black;
         background-color: rgb(40, 44, 50);
+        -webkit-text-fill-color: #4680d1;
     }
     .settingChoice {
         border: solid;
         margin-left: 20%;
         margin-right: 20%;
         border-width: .2rem;
-
+        border-color: #4680d1;
+        margin-bottom: 1.5%;
     }
     .settingButtons {
         border: solid;
@@ -214,9 +218,14 @@ import { update } from "lodash-es";
         background-color: #4680d1;
         margin-top: .2rem;
         margin-bottom: .2rem;
+        -webkit-text-fill-color: black;
+        
     }
     .settingItself {
         border: solid;
         border-width: .18rem;
+        border-color: #4680d1;
+        background-color: grey;
+        -webkit-text-fill-color: black;
     }
 </style>
