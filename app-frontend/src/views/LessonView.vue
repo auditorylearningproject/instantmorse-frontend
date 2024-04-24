@@ -460,10 +460,12 @@ const cwDefaults = ref<CWSettings>({
       <p id="currentstate">{{ currentState }}</p>  
 
       <!-- <p id="currentletter">{{ currentLetter }}</p> -->
-      <div id="micAdjust">Adjust microphone sensitivity: <input v-model="micSensitivity" type="range" min="0.001" max="0.010" step="0.001" id="mic-sensitivity"></div>
-      <div v-if="!currentLetter">Loading lesson text...</div>
-      <div v-else>
-        <AudioPlayer @playbackFinished="cwStoppedPlaying" :current-text="currentLetter" v-if="hasSettings"></AudioPlayer>
+      <div class="player">
+        <div id="micAdjust">Adjust microphone sensitivity: <input v-model="micSensitivity" type="range" min="0.001" max="0.010" step="0.001" id="mic-sensitivity"></div>
+        <div v-if="!currentLetter">Loading lesson text...</div>
+        <div v-else>
+          <AudioPlayer @playbackFinished="cwStoppedPlaying" :current-text="currentLetter" v-if="hasSettings"></AudioPlayer>
+        </div>
       </div>
 
       <button id="saveStats" v-show="showStatistics" @click="saveStatistics">Save Statistics</button>
@@ -571,6 +573,11 @@ const cwDefaults = ref<CWSettings>({
   overflow-y: auto;
   padding: 0 20px; /* Add padding as needed */
   text-align: center;
-}
+  }
+  .player {
+    border: solid;
+    background-color: rgb(40, 44, 50);
+    -webkit-text-fill-color: white;
+  }
 </style>
   
