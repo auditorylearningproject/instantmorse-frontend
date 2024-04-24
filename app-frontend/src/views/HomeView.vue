@@ -165,6 +165,8 @@ a,
   border-radius: 10%;
   margin-left: 30%;
   margin-right: 30%;
+  background-color: rgb(40, 44, 50);
+  -webkit-text-fill-color: #4680d1;
 }
 
 /* @media (min-width: 1024px) {
