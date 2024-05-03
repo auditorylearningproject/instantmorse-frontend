@@ -11,6 +11,7 @@ import { LessonDto } from "@/dto/lesson.dto";
 import { shuffle } from 'lodash-es'
 import type { CWSettings } from '@/dto/cwsettings.dto';
 import { useSettingsStore } from '@/stores/settings';
+import { TranscriptionError } from '@/errors/TranscriptionError'
 
 const router = useRouter()
 const route = useRoute()
@@ -526,16 +527,38 @@ const cwDefaults = ref<CWSettings>({
   #mic-sensitivity {
     margin-top: 10px;
   }
+
+.sidebar {
+  position: relative;
+  margin-top: 20px;
+  max-width: 300px;
+}
+
+@media (min-width: 800px) { /* Change to min-width */
   .sidebar {
+    position: absolute;
+    right: 20px; /* Adjust as needed */
+    top: 50%;
+    transform: translateY(-50%);
+  }
+}
+
+ /* .sidebar {
     position: absolute;
     right: 20%;
     top: 50%;
     transform: translateY(-50%);
     overflow-y: auto;
     max-height: calc(100vh - 100px); /*Adjust as needed*/
-    border: solid;
+    /*border: solid;
     border-width: .1rem;
-  }
+  } */
+ /* @media (max-width: 800px) { /* Adjust max-width as needed */
+ /* .sidebar {
+  /*  position: static; /* Change position to static to move the sidebar below other content */
+  /*  margin: 20px auto; /* Add margin to center the sidebar */
+ /* } 
+} */
   .sidebar ul {
     list-style: none;
     padding: 0;

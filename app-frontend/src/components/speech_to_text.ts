@@ -69,7 +69,10 @@ export class Transcriber{
                       //'Content-Disposition': 'attachment; filename=recording', // Optional
           // Assuming the API response contains the transcribed text
       } catch (error) {
-        if (error instanceof Error && error.message) {
+        if(error instanceof TranscriptionError){
+          throw error;
+        }
+        else if (error instanceof Error && error.message) {
           throw new Error('Error sending recording request: ' + error.message);
       } else {
           throw new Error('Error sending recording request: Unknown error');
@@ -95,6 +98,7 @@ export class Transcriber{
   
 
 import {ref, onMounted, onUnmounted, watchEffect, toValue, reactive, type ComputedRef } from 'vue';
+import { TranscriptionError } from '@/errors/TranscriptionError';
 
 let shouldStartImmediately: RecorderController | null = null;
 function callbackMediaStreamReady(){
@@ -293,17 +297,15 @@ class RecorderController{
     //   callback = end;
     //   end = duration;
     // }
-  
     // milliseconds to seconds
     //also, ignoring the values passed in by the function and hardcoding the last 1 second of audio if possible. Sorry.
-    let end = duration*1000;/// in ms
-    let begin = this.lastEnd; /// in ms. -30000 compensates for random delays.
+    const end = duration*1000;/// in ms
+    const begin = this.lastEnd; /// in ms. -30000 compensates for random delays.
   
-    if (end > (duration*1000)) {
-      //error = new RangeError('end time must be less than or equal to ' + duration);
-      end = duration*1000;
-    }
-    this.lastEnd = end;
+    // if (end > (duration*1000)) {
+    //   //error = new RangeError('end time must be less than or equal to ' + duration);
+    //   end = duration*1000;
+    // }
 
     // if (begin <= 0) {
     //   //error = new RangeError('begin time must be greater than 0');
@@ -314,15 +316,19 @@ class RecorderController{
       error = new TypeError('callback must be a function');
     }
   
-    const startOffset = begin === 0 ? 0 : (rate * begin)/1000;
+    const startOffset = (begin === 0) ? 0 : (rate * begin)/1000;
     const endOffset = (rate * end)/1000;
     const frameCount = endOffset - startOffset;
+
     //console.log("startoffset: ", startOffset, " endOffset: ", endOffset);
     let newArrayBuffer;
     if(frameCount <= 0){
-      console.error("The audio snippet slice period is not valid.");
-      return;
+      //console.error("The audio snippet slice period is not valid.");
+      return; // no new audio for us to analyze, the loop looped too quickly
+    }else{
+      this.lastEnd = end;
     }
+
     try {
       newArrayBuffer = this.audioContext.createBuffer(channels, frameCount, rate);
       const anotherArray = new Float32Array(frameCount);
@@ -388,8 +394,8 @@ class RecorderController{
       const vol = this.autoCorrelate(this.analyser, buffer, this.audioContext.sampleRate);
 
       //const averageVolume = dataArray.reduce((acc, value) => acc + value, 0) / bufferLength;
-    //  console.log("frequency: ", vol, " buffer slice size: ", bufferLength);
-    //  console.log("noise detect: ", this.noiseDetected.value)
+      // console.log("frequency: ", vol, " buffer slice size: ", bufferLength);
+      // console.log("noise detect: ", this.noiseDetected.value)
       //sourceNode.disconnect()
 
       if (vol < this.silenceThreshold) {
