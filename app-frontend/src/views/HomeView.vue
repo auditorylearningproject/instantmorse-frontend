@@ -39,8 +39,8 @@ if(response && response.data['username']){
     <img alt="InstantMorse logo" class="logo" src="@/assets/morse-code.png" width="125" height="125" />
    
     <div class="greetings"> <h1 class="green"> InstantMorse.Codes - Learn Morse Code by Speaking!</h1></div>
-    <div class="explanations"> <h3>This project was inspired by Dr. Rogers and his interests in LCWO and learning morse code in new ways.
-      This website was a reimplementation to the work already done by a Benedictine College Graduate, who used MathLab to code a similar project.
+    <div class="explanations"> <h3>This project was inspired by Dr. Rogers and the LCWO.net website with the goal of learning morse code in new ways.
+      This website is a reimplementation to the work already done by a Benedictine College Mechanical Engineer, who used MATLAB to lay the foundation of voice timing recognition.
       Although there are already websites that help individuals learn Morse Code, our website is different in that it trains the individual by voice
       instead of by typing characters or words.
     </h3></div><br>
