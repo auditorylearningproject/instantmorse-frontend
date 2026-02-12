@@ -1,5 +1,7 @@
 # Response Time–Based Auditory Learning — Frontend
 
+![Project Screenshot](./app-frontend/public/static/UI_Prototype.png)
+
 Browser-based user interface for a Morse code training platform that measures spoken response time after audio playback.
 
 The application provides a self-paced alternative to traditional Morse code learning systems by focusing on instant recognition rather than typed transcription.
